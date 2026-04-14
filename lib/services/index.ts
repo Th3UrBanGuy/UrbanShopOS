@@ -1,5 +1,5 @@
 import { doc, getDoc, setDoc, runTransaction } from 'firebase/firestore';
-import { db, collections } from '../firebase';
+import { db } from '../firebase';
 
 export const indexService = {
   async getNextId(collectionName: string): Promise<number> {

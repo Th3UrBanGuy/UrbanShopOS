@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc, updateDoc, getDocs, collection } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db, collections } from '../firebase';
 
 export interface Settings {

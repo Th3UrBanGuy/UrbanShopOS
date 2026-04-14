@@ -17,8 +17,11 @@ import {
   Box,
   LayoutGrid,
   Zap,
-  Printer
+  Printer,
+  Download,
+  FileSpreadsheet
 } from 'lucide-react';
+import { exportToCSV, printReport } from '@/lib/exportUtils';
 import ResinCard from '@/components/ResinCard';
 import LiquidButton from '@/components/LiquidButton';
 import { cn } from '@/lib/utils';
@@ -87,6 +90,44 @@ export default function SalesView() {
     printReceipt(tx, settings);
   };
 
+  const handleExportList = () => {
+    const csvData = filteredTransactions.map(tx => ({
+      ID: tx.id,
+      Date: new Date(tx.timestamp).toLocaleString(),
+      Customer: tx.customerName || 'Walk-in',
+      Items: tx.items.map(i => `${i.quantity}x ${i.name}`).join(' | '),
+      Total: tx.total,
+      Status: tx.status,
+      Channel: tx.channel,
+      Payment: tx.paymentMethod
+    }));
+    exportToCSV(csvData, `Sales_Report_${activeTab}`);
+  };
+
+  const handlePrintList = () => {
+    printReport({
+      title: 'Sales Report',
+      subtitle: activeTab === 'all' ? 'All Channels' : `${activeTab.toUpperCase()} Channel`,
+      data: filteredTransactions,
+      columns: [
+        { key: 'timestamp', label: 'Date/Time', format: (v) => new Date(v).toLocaleString() },
+        { key: 'customerName', label: 'Customer', format: (v) => v || 'Walk-in' },
+        { key: 'total', label: 'Total', format: (v) => settings.formatPrice(v) },
+        { key: 'paymentMethod', label: 'Payment' },
+        { key: 'status', label: 'Status' }
+      ],
+      summary: [
+        { label: 'Total Revenue', value: settings.formatPrice(totalRev) },
+        { label: 'Total Orders', value: filteredTransactions.length.toString() },
+        { label: 'Avg Order', value: settings.formatPrice(avgValue) }
+      ],
+      settings: {
+        siteName: settings.siteName,
+        formatPrice: settings.formatPrice
+      }
+    });
+  };
+
   return (
     <div className="h-full flex flex-col lg:flex-row gap-6 overflow-hidden relative">
       
@@ -136,9 +177,26 @@ export default function SalesView() {
                  </button>
                ))}
             </div>
-            <div className="flex items-center gap-2 text-[10px] font-bold text-emerald-400">
-               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-               LIVE
+            <div className="flex items-center gap-2">
+               <button 
+                 onClick={handleExportList}
+                 className="p-2.5 rounded-xl bg-white/5 border border-white/5 text-white/40 hover:text-white hover:bg-white/10 transition-all group"
+                 title="Export to CSV"
+               >
+                 <FileSpreadsheet size={16} />
+               </button>
+               <button 
+                 onClick={handlePrintList}
+                 className="p-2.5 rounded-xl bg-white/5 border border-white/5 text-white/40 hover:text-white hover:bg-white/10 transition-all group"
+                 title="Print List"
+               >
+                 <Printer size={16} />
+               </button>
+               <div className="w-px h-6 bg-white/5 mx-1" />
+               <div className="flex items-center gap-2 text-[10px] font-bold text-emerald-400">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                  LIVE
+               </div>
             </div>
           </div>
 

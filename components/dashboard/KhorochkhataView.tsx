@@ -2,13 +2,14 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Wallet, Plus, Trash2, CalendarDays, Receipt, Search, Check, History } from 'lucide-react';
+import { Wallet, Plus, Trash2, CalendarDays, Receipt, Search, Check, History, Printer, FileSpreadsheet } from 'lucide-react';
 import ResinCard from '@/components/ResinCard';
 import LiquidButton from '@/components/LiquidButton';
 import { useExpenseStore } from '@/store/expenseStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { usePartyStore } from '@/store/partyStore';
 import { cn } from '@/lib/utils';
+import { exportToCSV, printReport } from '@/lib/exportUtils';
 
 export default function KhorochkhataView() {
   const { expenses, addExpense, removeExpense } = useExpenseStore();
@@ -56,6 +57,37 @@ export default function KhorochkhataView() {
       setAmount('');
       setSelectedPartyId('');
     }, 1500);
+  };
+
+  const handleExport = () => {
+    const csvData = filteredExpenses.map(e => ({
+      Date: new Date(e.date).toLocaleDateString(),
+      Time: new Date(e.date).toLocaleTimeString(),
+      Purpose: e.description,
+      Amount: e.amount
+    }));
+    exportToCSV(csvData, `Expenses_${selectedDate.replace(/\s/g, '_')}`);
+  };
+
+  const handlePrint = () => {
+    printReport({
+      title: 'Expense Ledger',
+      subtitle: `Date: ${selectedDate}`,
+      data: filteredExpenses,
+      columns: [
+        { key: 'date', label: 'Time', format: (v) => new Date(v).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) },
+        { key: 'description', label: 'Purpose' },
+        { key: 'amount', label: 'Amount', format: (v) => settings.formatPrice(v) }
+      ],
+      summary: [
+        { label: "Day's Total", value: settings.formatPrice(dailySpent) },
+        { label: 'Entries', value: filteredExpenses.length.toString() }
+      ],
+      settings: {
+        siteName: settings.siteName,
+        formatPrice: settings.formatPrice
+      }
+    });
   };
 
   const filteredExpenses = expenses.filter(e => {
@@ -223,15 +255,31 @@ export default function KhorochkhataView() {
               })}
             </div>
 
-            <div className="relative shrink-0">
-              <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" />
-              <input
-                type="text"
-                placeholder="Search history..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="w-full bg-white/5 border border-white/5 rounded-2xl py-3 pl-10 pr-4 text-sm font-bold outline-none focus:border-purple-500/30 transition-all text-white"
-              />
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="relative flex-1">
+                <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" />
+                <input
+                  type="text"
+                  placeholder="Search history..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  className="w-full bg-white/5 border border-white/5 rounded-2xl py-3 pl-10 pr-4 text-sm font-bold outline-none focus:border-purple-500/30 transition-all text-white"
+                />
+              </div>
+              <button 
+                onClick={handleExport}
+                className="p-3 rounded-2xl bg-white/5 border border-white/5 text-white/40 hover:text-white hover:bg-white/10 transition-all"
+                title="Export to CSV"
+              >
+                <FileSpreadsheet size={16} />
+              </button>
+              <button 
+                onClick={handlePrint}
+                className="p-3 rounded-2xl bg-white/5 border border-white/5 text-white/40 hover:text-white hover:bg-white/10 transition-all"
+                title="Print Report"
+              >
+                <Printer size={16} />
+              </button>
             </div>
           </div>
 
