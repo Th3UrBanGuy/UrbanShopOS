@@ -1,0 +1,73 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isSuperAdmin() {
+      return isAuthenticated() && request.auth.token.email == 'superadmin@aeroresin.com';
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['super_admin', 'admin'];
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Users collection - most restrictive
+    match /users/{userId} {
+      // Read: authenticated users can read their own profile and admins can read all
+      allow read: if isAuthenticated() && (
+        request.auth.uid == userId || isAdmin()
+      );
+      
+      // Create: only super admin can create users
+      allow create: if isSuperAdmin();
+      
+      // Update: own profile or admin
+      allow update: if isOwner(userId) || isAdmin();
+      
+      // Delete: only super admin, cannot delete self
+      allow delete: if isSuperAdmin() && request.auth.uid != userId;
+    }
+    
+    // Inventory collection - admin only
+    match /inventory/{productId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    // Coupons collection - admin only
+    match /coupons/{couponId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    // Sales collection - more permissive for POS operations
+    match /sales/{saleId} {
+      allow read: if isAuthenticated();
+      // POS can create sales, admins can update/delete
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin();
+    }
+    
+    // Settings collection - admin only
+    match /settings/{settingId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+    
+    // Indexes collection - system only
+    match /indexes/{indexId} {
+      allow read, write: if false; // System managed
+    }
+  }
+}

@@ -1,0 +1,13 @@
+# Ralph Progress Log
+Started: 2026-04-10T23:40:00+06:00
+---
+
+## Codebase Patterns
+- Use `zustand` with `/store` directory for state management.
+- Styling uses Vanilla CSS + Tailwind utility classes where requested.
+- Icons are from `lucide-react`.
+- Animations are handled by `framer-motion`.
+- Dashboard PIN is fixed at `726268`.
+
+---
+*Initialized Ralph loop environment.*
