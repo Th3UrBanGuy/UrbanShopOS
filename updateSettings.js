@@ -1,157 +1,6 @@
-'use client';
+const fs = require('fs');
 
-import React, { useState } from 'react';
-import {
-  Globe, Percent, Printer, Palette, Type, Check,
-  Layout, ChevronDown, Zap, Shield, Bell, Sliders,
-  Eye, EyeOff, RotateCcw, Star, AlignLeft, AlignCenter,
-  AlignRight, Minus, FileText, Hash, Clock, Calendar,
-  CreditCard, Barcode, PenLine, Scissors, Layers, Sparkles, Phone, ArrowLeft
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '@/lib/utils';
-import { useSettingsStore, BillDesign } from '@/store/settingsStore';
-import { useDashboardStore } from '@/store/dashboardStore';
-import { useAuthStore } from '@/store/authStore';
-import { useToastStore } from '@/store/toastStore';
-import ReceiptDocument from './ReceiptDocument';
-import { printReceipt } from '@/lib/printReceipt';
-import UserManagementView from '@/components/dashboard/UserManagementView';
-
-// ─── UI Primitives ──────────────────────────────────────────────────────────
-
-function SectionAccordion({
-  icon: Icon, title, accent = '#6366f1', defaultOpen = false, children
-}: {
-  icon: React.ElementType; title: string; accent?: string;
-  defaultOpen?: boolean; children: React.ReactNode;
-}) {
-  const [open, setOpen] = useState(defaultOpen);
-  return (
-    <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] overflow-hidden">
-      <button
-        onClick={() => setOpen(v => !v)}
-        className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-[var(--card-bg)] transition-colors"
-      >
-        <div className="w-8 h-8 shrink-0 rounded-xl flex items-center justify-center"
-          style={{ background: accent + '18', border: `1px solid ${accent}30`, color: accent }}>
-          <Icon size={15} />
-        </div>
-        <span className="flex-1 text-sm font-bold uppercase tracking-widest text-[var(--text-primary)]/80">{title}</span>
-        <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>
-          <ChevronDown size={14} className="text-[var(--text-muted)]" />
-        </motion.div>
-      </button>
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.22, ease: 'easeInOut' }}
-            className="overflow-hidden"
-          >
-            <div className="px-5 pb-6 pt-2 border-t border-[var(--card-border)] space-y-5">
-              {children}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="space-y-1.5">
-      <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">{label}</label>
-      {children}
-    </div>
-  );
-}
-
-function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
-  return (
-    <input
-      {...props}
-      className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-primary)] font-medium outline-none transition-all focus:border-[var(--accent)]/50 focus:bg-[var(--card-bg)] placeholder:text-[var(--text-muted)]"
-    />
-  );
-}
-
-function Toggle({ value, onChange, accent = '#6366f1' }: { value: boolean; onChange: (v: boolean) => void; accent?: string }) {
-  return (
-    <button
-      onClick={() => onChange(!value)}
-      className="relative w-10 h-[22px] rounded-full transition-colors shrink-0"
-      style={{ background: value ? accent : 'rgba(255,255,255,0.12)' }}
-    >
-      <motion.div
-        layout
-        transition={{ type: 'spring', stiffness: 600, damping: 35 }}
-        className="absolute top-[3px] w-4 h-4 rounded-full bg-white shadow-sm"
-        style={{ left: value ? 'calc(100% - 19px)' : '3px' }}
-      />
-    </button>
-  );
-}
-
-function SegmentControl<T extends string>({
-  value, onChange, options
-}: { value: T; onChange: (v: T) => void; options: { value: T; label: string; icon?: React.ReactNode }[] }) {
-  return (
-    <div className="flex bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl p-1 gap-1">
-      {options.map(opt => (
-        <button
-          key={opt.value}
-          onClick={() => onChange(opt.value)}
-          className={cn(
-            'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all',
-            value === opt.value ? 'bg-[var(--text-primary)] text-[var(--background)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-          )}
-        >
-          {opt.icon}{opt.label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function ColorSwatch({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
-  return (
-    <label className="flex flex-col gap-1.5 cursor-pointer group">
-      <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">{label}</span>
-      <div className="flex items-center gap-2.5 bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl px-3 py-2 group-hover:border-[var(--text-muted)] transition-colors">
-        <div className="w-6 h-6 rounded-lg border border-white/15 shrink-0 overflow-hidden">
-          <input type="color" value={value} onChange={e => onChange(e.target.value)} className="w-8 h-8 -m-1 cursor-pointer border-none bg-transparent" />
-        </div>
-        <span className="font-mono text-[11px] text-white/50 group-hover:text-white/70 transition-colors">{value}</span>
-      </div>
-    </label>
-  );
-}
-
-function ToggleRow({ icon: Icon, label, sub, value, onChange, accent = '#6366f1' }: {
-  icon: React.ElementType; label: string; sub?: string;
-  value: boolean; onChange: (v: boolean) => void; accent?: string;
-}) {
-  return (
-    <div className={cn(
-      'flex items-center gap-3 rounded-xl px-3 py-3 transition-all border',
-      value ? 'bg-[var(--card-bg)] border-[var(--card-border)]' : 'bg-transparent border-[var(--card-border)]'
-    )}>
-      <div className="w-7 h-7 shrink-0 rounded-lg flex items-center justify-center"
-        style={{ background: value ? accent + '20' : 'rgba(255,255,255,0.05)', color: value ? accent : 'rgba(255,255,255,0.3)' }}>
-        <Icon size={13} />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-white leading-none">{label}</p>
-        {sub && <p className="text-[10px] text-white/30 mt-0.5">{sub}</p>}
-      </div>
-      <Toggle value={value} onChange={onChange} accent={accent} />
-    </div>
-  );
-}
+const CODE_TO_ADD = `
 
 // ─── Report Live Preview ────────────────────────────────────────────────────
 
@@ -216,8 +65,9 @@ const PRESET_THEMES: { name: string; emoji: string; patch: Partial<BillDesign> }
 const TOOLBOX_CARDS = [
   { id: 'org', icon: Globe, label: 'Organization', desc: 'Brand, currency, and tax setup', color: '#6366f1' },
   { id: 'bill', icon: Sparkles, label: 'Bill Designer', desc: 'Receipt themes and customization', color: '#f59e0b' },
-  { id: 'report', label: 'Report Branding', icon: FileText, desc: 'Tailor document ledger appearance', color: '#10b981' },
-  { id: 'prefs', label: 'App Preferences', icon: Sliders, desc: 'System behavior & HUD notifications', color: '#8b5cf6' }
+  { id: 'report', icon: FileText, label: 'Report Branding', desc: 'Ledger and list customization', color: '#10b981' },
+  { id: 'prefs', icon: Sliders, label: 'App Preferences', desc: 'Notifications and UI motion', color: '#8b5cf6' },
+  { id: 'sec', icon: Shield, label: 'Security', desc: 'PIN login and role access', color: '#ef4444' }
 ];
 
 // ─── Main ───────────────────────────────────────────────────────────────────
@@ -260,7 +110,10 @@ export default function SettingsView() {
   const [autoSave, setAutoSave] = useState(true);
   const [animations, setAnimations] = useState(true);
   const [previewZoom, setPreviewZoom] = useState(false);
+  const [subTab, setSubTab] = useState<'system' | 'users'>('system');
   const [activeTool, setActiveTool] = useState<string | null>(null);
+
+  const canManageUsers = currentUser?.role === 'super_admin' || currentUser?.role === 'admin';
 
   return (
     <div className="w-full space-y-4 md:space-y-6">
@@ -268,57 +121,79 @@ export default function SettingsView() {
       {/* Page title - Compact */}
       <div className="mb-2 flex items-center gap-4">
         <button 
-          onClick={() => activeTool ? setActiveTool(null) : setGlobalTab('Hub')}
-          className="w-10 h-10 rounded-2xl bg-[var(--card-bg)] border border-[var(--card-border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--card-bg)] transition-all shadow-resin"
+          onClick={() => setGlobalTab('Management')}
+          className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all shadow-resin"
         >
           <ArrowLeft size={18} />
         </button>
         <div>
           <h2 className="text-xl md:text-2xl font-black tracking-tighter uppercase leading-none mb-1">Settings</h2>
-          <p className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-[0.15em]">Manage your store & receipt design</p>
+          <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.15em]">Manage your store & receipt design</p>
         </div>
       </div>
 
+      {/* Sub-tabs (admin+ only) */}
+      {canManageUsers && (
+        <div className="flex gap-1 bg-white/[0.03] border border-white/5 rounded-2xl p-1 w-fit">
+          {[{ key: 'system', label: '⚙️ System Toolbox' }, { key: 'users', label: '👥 Team & Access' }].map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => { setSubTab(tab.key as typeof subTab); setActiveTool(null); }}
+              className={cn(
+                'px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all',
+                subTab === tab.key
+                  ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
+                  : 'text-white/40 hover:text-white/70 hover:bg-white/5'
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* ── USER MANAGEMENT ── */}
+      {canManageUsers && subTab === 'users' && <UserManagementView />}
+
       {/* ── SYSTEM TOOLBOX ── */}
-      {!activeTool && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-20 mt-4">
+      {subTab === 'system' && !activeTool && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-20">
           {TOOLBOX_CARDS.map(card => (
             <button
               key={card.id}
               onClick={() => setActiveTool(card.id)}
-              className="group text-left p-8 rounded-[2rem] bg-[var(--card-bg)] border border-[var(--card-border)] hover:border-[var(--text-muted)] hover:bg-[var(--card-bg)] transition-all duration-300 flex flex-col gap-5 relative overflow-hidden"
+              className="group text-left p-6 rounded-3xl bg-white/[0.02] border border-white/5 hover:border-white/10 hover:bg-white/[0.04] transition-all flex flex-col gap-4"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <div 
-                className="w-14 h-14 rounded-[1.25rem] flex items-center justify-center transition-transform duration-500 group-hover:scale-110 shadow-resin relative z-10"
-                style={{ background: card.color + '15', border: `1px solid ${card.color}30`, color: card.color }}
+                className="w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110"
+                style={{ background: card.color + '18', border: \`1px solid \${card.color}30\`, color: card.color }}
               >
-                <card.icon size={26} strokeWidth={1.5} />
+                <card.icon size={24} strokeWidth={1.5} />
               </div>
-              <div className="relative z-10">
-                <h3 className="text-xl font-black text-[var(--text-primary)] tracking-tighter">{card.label}</h3>
-                <p className="text-sm font-medium text-[var(--text-muted)] mt-1">{card.desc}</p>
+              <div>
+                <h3 className="text-lg font-black text-white">{card.label}</h3>
+                <p className="text-xs font-medium text-white/40 mt-1">{card.desc}</p>
               </div>
             </button>
           ))}
         </div>
       )}
 
-      {activeTool && (
-        <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 mt-4">
+      {subTab === 'system' && activeTool && (
+        <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
           {/* Left controls */}
           <div className="xl:col-span-3 space-y-4">
-             <button onClick={() => setActiveTool(null)} className="flex w-fit items-center gap-2 mb-2 px-3 py-2 rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] text-[10px] font-black text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all uppercase tracking-widest">
+             <button onClick={() => setActiveTool(null)} className="flex w-fit items-center gap-2 mb-2 px-3 py-2 rounded-lg bg-white/5 border border-white/5 text-[10px] font-bold text-white/60 hover:text-white transition-colors uppercase tracking-widest">
                <ArrowLeft size={12} /> Back to Toolbox
              </button>
              
-             <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl p-6 space-y-8">
+             <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-6 space-y-8">
                
                {/* ORGANIZATION TOOL */}
                {activeTool === 'org' && (
                  <>
                   <div>
-                    <h3 className="text-lg font-black text-[var(--text-primary)] flex items-center gap-2 mb-4"><Globe className="text-[var(--accent)]" size={20} /> Organization Setup</h3>
+                    <h3 className="text-lg font-black text-white flex items-center gap-2 mb-4"><Globe className="text-indigo-500" size={20} /> Organization Setup</h3>
                     <div className="space-y-4">
                       <Field label="Brand Name">
                         <TextInput value={settings.siteName} onChange={e => settings.setSiteName(e.target.value)} placeholder="Your brand..." />
@@ -329,7 +204,7 @@ export default function SettingsView() {
                             <select
                               value={settings.currency}
                               onChange={e => settings.setCurrency(e.target.value)}
-                              className="flex-1 bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-primary)] font-medium outline-none focus:border-[var(--accent)]/5 focus:bg-[var(--card-bg)] transition-all appearance-none"
+                              className="flex-1 bg-black/30 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white font-medium outline-none focus:border-indigo-500/50 transition-all appearance-none"
                             >
                               <option value="USD">USD ($)</option>
                               <option value="EUR">EUR (€)</option>
@@ -348,7 +223,7 @@ export default function SettingsView() {
                                   addToast('Failed to fetch exchange rates', 'error');
                                 }
                               }}
-                              className="px-3 rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] hover:border-[var(--text-muted)] text-[var(--accent)] transition-all"
+                              className="px-3 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 text-indigo-400 hover:text-indigo-300 transition-all"
                               title="Fetch Latest Rates"
                             >
                               <RotateCcw size={14} />
@@ -359,21 +234,10 @@ export default function SettingsView() {
                           <TextInput type="number" value={settings.defaultTaxRate} onChange={e => settings.setDefaultTaxRate?.(Number(e.target.value))} min={0} max={100} />
                         </Field>
                       </div>
-                      <Field label={`Alert when stock is below: ${settings.lowStockThreshold} units`}>
-                        <div className="flex items-center gap-4">
-                           <input type="range" min="5" max="50" value={settings.lowStockThreshold}
-                             onChange={e => settings.setLowStockThreshold?.(Number(e.target.value))}
-                             className="flex-1 h-1.5 bg-[var(--card-border)] rounded-full appearance-none cursor-pointer accent-[var(--accent)]" />
-                           <span className="text-xs font-black text-[var(--accent)] min-w-[20px]">{settings.lowStockThreshold}</span>
-                        </div>
-                      </Field>
-                      <Field label={`Stock Hold Duration: ${settings.stockHoldMinutes} minutes`}>
-                        <div className="flex items-center gap-4">
-                           <input type="range" min="1" max="60" value={settings.stockHoldMinutes}
-                             onChange={e => settings.setStockHoldMinutes?.(Number(e.target.value))}
-                             className="flex-1 h-1.5 bg-[var(--card-border)] rounded-full appearance-none cursor-pointer accent-amber-500" />
-                           <span className="text-xs font-black text-amber-500 min-w-[20px] ml-1">{settings.stockHoldMinutes}</span>
-                        </div>
+                      <Field label={\`Alert when stock is below: \${settings.lowStockThreshold} units\`}>
+                        <input type="range" min="5" max="50" value={settings.lowStockThreshold}
+                          onChange={e => settings.setLowStockThreshold?.(Number(e.target.value))}
+                          className="w-full h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-indigo-500" />
                       </Field>
                     </div>
                   </div>
@@ -383,7 +247,7 @@ export default function SettingsView() {
                {/* BILL DESIGNER TOOL */}
                {activeTool === 'bill' && (
                  <>
-                  <h3 className="text-lg font-black text-[var(--text-primary)] flex items-center gap-2 mb-4"><Sparkles className="text-amber-500" size={20} /> Bill Designer</h3>
+                  <h3 className="text-lg font-black text-white flex items-center gap-2 mb-4"><Sparkles className="text-amber-500" size={20} /> Bill Designer</h3>
                   
                   {/* Quick themes */}
                   <div>
@@ -393,7 +257,7 @@ export default function SettingsView() {
                         <button key={name} onClick={() => upd(patch)} title={name}
                           className="flex flex-col items-center gap-1.5 py-3 px-1 rounded-xl bg-white/[0.03] border border-white/5 hover:border-white/20 hover:bg-white/[0.06] transition-all group">
                           <span className="text-xl">{emoji}</span>
-                          <span className="text-[9px] font-bold text-[var(--text-muted)] group-hover:text-[var(--text-primary)] uppercase tracking-wide leading-none text-center">{name}</span>
+                          <span className="text-[9px] font-bold text-white/40 group-hover:text-white/70 uppercase tracking-wide leading-none text-center">{name}</span>
                         </button>
                       ))}
                     </div>
@@ -425,7 +289,7 @@ export default function SettingsView() {
 
                   {/* Typography */}
                   <div className="border-t border-white/5 pt-5 space-y-3">
-                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest flex items-center gap-2"><Type size={10} /> Typography</p>
+                    <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest flex items-center gap-2"><Type size={10} /> Typography</p>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <Field label="Font Family">
                         <SegmentControl value={d.fontFamily} onChange={v => upd({ fontFamily: v })}
@@ -471,7 +335,7 @@ export default function SettingsView() {
                           options={[{ value: 'none', label: 'None' }, { value: 'top', label: 'Top' }, { value: 'bottom', label: 'Bot' }, { value: 'both', label: 'Both' }]} />
                       </Field>
                     </div>
-                    <Field label={`Accent Bar Width: ${d.accentWidth}px`}>
+                    <Field label={\`Accent Bar Width: \${d.accentWidth}px\`}>
                       <input type="range" min="2" max="12" value={d.accentWidth} onChange={e => upd({ accentWidth: Number(e.target.value) })}
                         className="w-full h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-amber-400" />
                     </Field>
@@ -500,7 +364,7 @@ export default function SettingsView() {
                {/* REPORT BRANDING TOOL */}
                {activeTool === 'report' && (
                  <>
-                  <h3 className="text-lg font-black text-[var(--text-primary)] flex items-center gap-2 mb-4"><FileText className="text-emerald-500" size={20} /> Report Branding</h3>
+                  <h3 className="text-lg font-black text-white flex items-center gap-2 mb-4"><FileText className="text-emerald-500" size={20} /> Report Branding</h3>
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <Field label="Default Report Header">
@@ -520,16 +384,29 @@ export default function SettingsView() {
                  </>
                )}
 
-
-
                {/* PREFERENCES TOOL */}
                {activeTool === 'prefs' && (
                  <>
-                  <h3 className="text-lg font-black text-[var(--text-primary)] flex items-center gap-2 mb-4"><Sliders className="text-purple-500" size={20} /> App Preferences</h3>
+                  <h3 className="text-lg font-black text-white flex items-center gap-2 mb-4"><Sliders className="text-purple-500" size={20} /> App Preferences</h3>
                   <div className="space-y-2">
                     <ToggleRow icon={Bell} label="Push Notifications" sub="Inventory and order alerts" value={notifs} onChange={setNotifs} accent="#8b5cf6" />
                     <ToggleRow icon={Zap} label="Auto-Save Changes" sub="No manual confirmation required" value={autoSave} onChange={setAutoSave} accent="#8b5cf6" />
                     <ToggleRow icon={Star} label="Motion & Animations" sub="UI micro-interactions" value={animations} onChange={setAnimations} accent="#8b5cf6" />
+                  </div>
+                 </>
+               )}
+
+               {/* SECURITY TOOL */}
+               {activeTool === 'sec' && (
+                 <>
+                  <h3 className="text-lg font-black text-white flex items-center gap-2 mb-4"><Shield className="text-rose-500" size={20} /> Security</h3>
+                  <div className="flex items-center gap-3 bg-emerald-500/5 border border-emerald-500/15 rounded-xl p-4">
+                    <div className="w-9 h-9 shrink-0 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400"><Shield size={16} /></div>
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-white">PIN Login Enabled</p>
+                      <p className="text-[11px] text-white/40 mt-0.5">Role-based access is enabled for all users</p>
+                    </div>
+                    <span className="text-[9px] text-emerald-400 font-bold uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded-lg">Active</span>
                   </div>
                  </>
                )}
@@ -568,29 +445,7 @@ export default function SettingsView() {
                   style={{ maxHeight: previewZoom ? 'none' : 520 }}>
                   <div className="origin-top transition-transform duration-300"
                     style={{ transform: previewZoom ? 'scale(1)' : 'scale(0.88)', transformOrigin: 'top center' }}>
-                    {activeTool === 'bill' && (
-                      <ReceiptDocument 
-                        siteName={settings.siteName}
-                        currency={settings.currency}
-                        billDesign={d}
-                        transactionId="TXN-DEMO-8240"
-                        timestamp={new Date().toISOString()}
-                        items={[
-                          { name: 'Fluid Resin Panel', quantity: 2, price: 140.00, article: 'SH-2024-X' },
-                          { name: 'AeroGel Coating', quantity: 1, price: 85.00, article: 'AC-992-B' }
-                        ]}
-                        subtotal={365.00}
-                        taxTotal={43.80}
-                        discount={15.00}
-                        couponCode="AERO15"
-                        total={393.80}
-                        paymentMethod="CASH"
-                        channel="pos"
-                        customerName="Test Customer"
-                        customerPhone="+880 1712-345678"
-                        className="shadow-2xl scale-[0.8] lg:scale-[0.9] origin-top mx-auto"
-                      />
-                    )}
+                    {activeTool === 'bill' && <BillPreview d={d} siteName={settings.siteName} currency={settings.currency} />}
                     {activeTool === 'report' && <ReportPreview d={d} siteName={settings.siteName} />}
                   </div>
                 </div>
@@ -599,7 +454,7 @@ export default function SettingsView() {
                     className="py-2.5 rounded-xl border border-white/10 text-white/40 hover:text-white hover:border-white/20 hover:bg-white/5 text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5">
                     <RotateCcw size={11} /> Reset
                   </button>
-                  <button onClick={handleApply} className="py-2.5 rounded-xl bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5">
+                  <button onClick={handleApply} className="py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5">
                     <Zap size={11} /> Apply
                   </button>
                 </div>
@@ -611,3 +466,14 @@ export default function SettingsView() {
     </div>
   );
 }
+`;
+
+const file = fs.readFileSync('components/dashboard/SettingsView.tsx', 'utf8');
+
+// I will slice up to the Preset Themes comment
+const idx1 = file.indexOf('// ─── Preset Themes ──────────────────────────────────────────────────────────');
+
+const newFileContent = file.substring(0, idx1) + CODE_TO_ADD;
+
+fs.writeFileSync('components/dashboard/SettingsView.tsx', newFileContent);
+console.log('Successfully updated SettingsView.tsx');

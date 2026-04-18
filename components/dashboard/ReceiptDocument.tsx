@@ -56,13 +56,16 @@ export default function ReceiptDocument({
 
   const displayPhone = customerPhone || (billDesign.showCustomerPhone ? "017XX-XXXXXX" : null);
 
-  const cornerClass = billDesign.cornerStyle === 'pill' ? 'rounded-[2rem]'
-    : billDesign.cornerStyle === 'rounded' ? 'rounded-2xl'
+  const cornerClass = billDesign.cornerStyle === 'pill' ? 'rounded-[32px]'
+    : billDesign.cornerStyle === 'rounded' ? 'rounded-[16px]'
     : 'rounded-none';
 
-  const fontClass = billDesign.fontFamily === 'mono' ? 'font-mono'
-    : billDesign.fontFamily === 'serif' ? 'font-serif'
-    : '';
+  const fontStyle = billDesign.fontFamily === 'mono' ? { fontFamily: "'JetBrains Mono', monospace" }
+    : billDesign.fontFamily === 'serif' ? { fontFamily: "'Playfair Display', serif" }
+    : { fontFamily: "'Inter', sans-serif" };
+
+  const fsBase = billDesign.fontSize === 'sm' ? 11 : billDesign.fontSize === 'lg' ? 14 : 12;
+  const fw = billDesign.fontWeight === 'black' ? '900' : billDesign.fontWeight === 'bold' ? '700' : '400';
 
   const alignClass = billDesign.headerAlign === 'left' ? 'text-left'
     : billDesign.headerAlign === 'right' ? 'text-right'
@@ -81,12 +84,18 @@ export default function ReceiptDocument({
 
   return (
     <div
-      className={cn('w-full overflow-hidden flex flex-col relative', cornerClass, fontClass, className)}
-      style={{ backgroundColor: billDesign.bgColor, color: billDesign.textColor }}
+      className={cn('w-full overflow-hidden flex flex-col relative transition-all duration-500 shadow-2xl', cornerClass, className)}
+      style={{ 
+        backgroundColor: billDesign.bgColor, 
+        color: billDesign.textColor, 
+        ...fontStyle,
+        fontSize: `${fsBase}px`,
+        fontWeight: fw
+      }}
     >
       {/* Accent bar — top */}
       {(billDesign.accentPosition === 'top' || billDesign.accentPosition === 'both') && (
-        <div style={{ height: billDesign.accentWidth, background: billDesign.accentColor, flexShrink: 0 }} />
+        <div style={{ height: `${billDesign.accentWidth}px`, background: billDesign.accentColor, flexShrink: 0 }} />
       )}
 
       {/* Left accent bar */}
@@ -96,9 +105,9 @@ export default function ReceiptDocument({
 
       {/* Perforations — top */}
       {billDesign.showPerforations && (
-        <div className="flex justify-between px-2 overflow-hidden" style={{ backgroundColor: billDesign.bgColor }}>
+        <div className="flex justify-between px-2 overflow-hidden py-1" style={{ backgroundColor: billDesign.bgColor }}>
           {Array.from({ length: 14 }).map((_, i) => (
-            <div key={i} className="w-4 h-4 rounded-full -mt-2 shrink-0" style={{ backgroundColor: '#e5e7eb' }} />
+            <div key={i} className="w-2.5 h-2.5 rounded-full -mt-1.5 shrink-0 bg-black/10" />
           ))}
         </div>
       )}
@@ -108,15 +117,15 @@ export default function ReceiptDocument({
         className={cn('flex-1 overflow-y-auto no-scrollbar px-6 py-5', billDesign.accentPosition === 'left' ? 'pl-10' : '')}
       >
         {/* Header */}
-        <div className={cn('mb-5', alignClass)}>
-          <div className="text-2xl font-black tracking-tighter leading-none" style={{ color: billDesign.accentColor }}>
+        <div className={cn('mb-6', alignClass)}>
+          <div className="text-3xl font-black tracking-tighter leading-none mb-1" style={{ color: billDesign.accentColor, fontFamily: "'Space Grotesk', sans-serif" }}>
             {siteName}
           </div>
-          <div className="text-[9px] font-black uppercase tracking-[0.2em] mt-1" style={{ color: billDesign.mutedColor }}>
+          <div className="text-[10px] font-black uppercase tracking-[0.25em] mb-1" style={{ color: billDesign.mutedColor }}>
             {billDesign.headerText}
           </div>
           {billDesign.subHeaderText && (
-            <div className="text-[8px] uppercase tracking-widest mt-0.5" style={{ color: billDesign.mutedColor }}>
+            <div className="text-[9px] font-bold uppercase tracking-widest" style={{ color: billDesign.mutedColor }}>
               {billDesign.subHeaderText}
             </div>
           )}
@@ -246,8 +255,8 @@ export default function ReceiptDocument({
 
         {/* Signature line */}
         {billDesign.showSignatureLine && (
-          <div className="mt-6 pt-2 text-center" style={{ borderTop: `1px solid ${billDesign.borderColor}` }}>
-            <span className="text-[8px]" style={{ color: billDesign.mutedColor }}>Signature</span>
+          <div className="mt-8 pt-2 text-center" style={{ borderTop: `1px solid ${billDesign.borderColor}` }}>
+            <span className="text-[8px] font-bold uppercase tracking-widest" style={{ color: billDesign.mutedColor }}>Authorized Personnel</span>
           </div>
         )}
       </div>

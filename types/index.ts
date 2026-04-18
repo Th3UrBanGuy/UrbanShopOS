@@ -43,6 +43,11 @@ export interface CartItem {
   price: number;
   quantity: number;
   tax: number;
+  image?: string;
+  selectedVariant?: {
+    color: string;
+    size: string;
+  };
 }
 
 export interface SaleTransaction {
@@ -57,8 +62,12 @@ export interface SaleTransaction {
   timestamp: string;
   customerName?: string;
   customerPhone?: string;
+  customerEmail?: string;
+  deliveryAddress?: string;
+  deliveryCity?: string;
+  deliveryZip?: string;
   channel: 'pos' | 'online';
-  status: 'completed' | 'pending' | 'processing' | 'shipped' | 'delivered';
+  status: 'completed' | 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 }
 
 // ─── Party & Deal Types ──────────────────────────────────────

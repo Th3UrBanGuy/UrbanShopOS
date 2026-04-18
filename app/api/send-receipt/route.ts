@@ -31,7 +31,7 @@ export async function POST(req: Request) {
         <div style="border-top: 1px dashed #ccc; border-bottom: 1px dashed #ccc; padding: 15px 0; margin-bottom: 15px;">
           <table style="width: 100%; border-collapse: collapse;">
             <tbody>
-              ${receiptDetails?.items?.map((item: any) => `
+              ${receiptDetails?.items?.map((item: { name: string; price: number }) => `
                 <tr>
                   <td style="padding: 4px 0; text-align: left;">${item.name}</td>
                   <td style="padding: 4px 0; text-align: right;">${receiptDetails.currency || '$'}${item.price.toFixed(2)}</td>
@@ -84,8 +84,8 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ success: true, messageId: info.messageId });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Nodemailer Error:', error);
-    return NextResponse.json({ error: error.message || 'Failed to send email' }, { status: 500 });
+    return NextResponse.json({ error: (error as Error).message || 'Failed to send email' }, { status: 500 });
   }
 }

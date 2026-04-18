@@ -2,11 +2,12 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ShoppingBag, Star } from 'lucide-react';
+import { Search, ShoppingBag, Star, ArrowRight } from 'lucide-react';
 import ResinCard from '@/components/ResinCard';
 import LiquidButton from '@/components/LiquidButton';
 import { useInventoryStore } from '@/store/inventoryStore';
 import { useCartStore } from '@/store/cartStore';
+import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
 export default function MarketPage() {
@@ -24,12 +25,16 @@ export default function MarketPage() {
   );
 
   const handleAddToCart = (product: typeof products[0]) => {
+    const hasVariants = product.variants && product.variants.length > 0;
+    if (hasVariants) return; // Allow redirect to handle selection
+
     addItem({
       productId: product.id,
       name: product.name,
       article: product.article,
       price: product.price,
       tax: product.tax,
+      image: product.image
     });
   };
 
@@ -107,20 +112,41 @@ export default function MarketPage() {
                     className="h-full cursor-pointer hover:translate-y-[-4px] transition-transform"
                   >
                     <div className="p-6 flex flex-col h-full group">
-                      <div className="aspect-square rounded-2xl bg-gradient-to-br from-white/5 to-white/0 border border-white/5 mb-6 flex items-center justify-center relative overflow-hidden">
-                        <div className="text-6xl font-black text-white/5 group-hover:text-white/10 transition-colors select-none">
-                          {product.article.split('-')[0]}
+                      <div className="aspect-square rounded-2xl bg-[var(--background)] border border-white/5 mb-6 flex items-center justify-center relative overflow-hidden shadow-inner">
+                        <div className="absolute inset-0 z-0">
+                          {product.image ? (
+                            <motion.img 
+                              whileHover={{ scale: 1.1 }}
+                              src={product.image} 
+                              alt={product.name} 
+                              className="w-full h-full object-cover transition-transform duration-700 opacity-60 group-hover:opacity-100"
+                            />
+                          ) : (
+                            <div className="text-6xl font-black text-white/5 group-hover:text-white/10 transition-colors select-none">
+                              {product.article.split('-')[0]}
+                            </div>
+                          )}
                         </div>
-                        {product.tag && (
-                          <div className="absolute top-4 left-4 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/10 text-[10px] font-bold uppercase tracking-wider">
-                            {product.tag}
-                          </div>
-                        )}
-                        {product.stock < 20 && (
-                          <div className="absolute top-4 right-4 px-2 py-1 bg-rose-500/20 backdrop-blur-md rounded-full border border-rose-500/30 text-[8px] font-bold uppercase text-rose-400">
-                            Low Stock
-                          </div>
-                        )}
+                        
+                        <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
+                          {product.tag && (
+                            <div className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/10 text-[10px] font-bold uppercase tracking-wider">
+                              {product.tag}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="absolute top-4 right-4 z-10">
+                          {product.stock <= 0 ? (
+                            <div className="px-2 py-1 bg-rose-500/20 backdrop-blur-md rounded-full border border-rose-500/30 text-[8px] font-bold uppercase text-rose-400">
+                              Sold Out
+                            </div>
+                          ) : product.stock < 20 && (
+                            <div className="px-2 py-1 bg-amber-500/20 backdrop-blur-md rounded-full border border-amber-500/30 text-[8px] font-bold uppercase text-amber-400">
+                              Low Stock
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       <div className="mt-auto">
@@ -145,14 +171,19 @@ export default function MarketPage() {
                           </span>
                           <LiquidButton
                             variant="icon"
-                            className="w-10 h-10 p-0 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0"
+                            disabled={product.stock <= 0}
+                            className={cn(
+                              "w-10 h-10 p-0 transition-all translate-y-2 lg:opacity-0 lg:group-hover:opacity-100 lg:group-hover:translate-y-0",
+                              product.stock <= 0 ? "opacity-20 cursor-not-allowed" : "opacity-100"
+                            )}
                             onClick={(e) => {
+                              if (product.variants && product.variants.length > 0) return;
                               e.preventDefault();
                               e.stopPropagation();
                               handleAddToCart(product);
                             }}
                           >
-                            <ShoppingBag size={16} />
+                            {product.variants && product.variants.length > 0 ? <ArrowRight size={16} /> : <ShoppingBag size={16} />}
                           </LiquidButton>
                         </div>
                       </div>

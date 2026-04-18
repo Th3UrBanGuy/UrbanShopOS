@@ -8,6 +8,7 @@ import LiquidButton from '@/components/LiquidButton';
 import Link from 'next/link';
 import { useInventoryStore } from '@/store/inventoryStore';
 import { useCartStore } from '@/store/cartStore';
+import { cn } from '@/lib/utils';
 
 export default function Home() {
   const products = useInventoryStore((s) => s.products);
@@ -92,60 +93,94 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[250px]">
-            {featured.map((product, i) => (
-              <Link key={product.id} href={`/product/${product.id}`} className={SPANS[i] || 'col-span-1'}>
-                <ResinCard
-                  glowingColor={
-                    i % 2 === 0
-                      ? 'rgba(99, 102, 241, 0.2)'
-                      : 'rgba(236, 72, 153, 0.2)'
-                  }
-                  className="h-full cursor-pointer hover:scale-[1.02] transition-transform duration-500"
-                >
-                  <div className="p-8 flex flex-col h-full justify-between relative group">
-                    <div className="flex justify-between items-start">
-                      {product.tag && (
-                        <span className="px-3 py-1 text-xs font-semibold bg-white/10 backdrop-blur-md rounded-full border border-white/10 text-white/90">
-                          {product.tag}
-                        </span>
+            {featured.map((product, i) => {
+              const hasVariants = product.variants && product.variants.length > 0;
+              const isOutOfStock = product.stock <= 0;
+
+              return (
+                <Link key={product.id} href={`/product/${product.id}`} className={SPANS[i] || 'col-span-1'}>
+                  <ResinCard
+                    glowingColor={
+                      i % 2 === 0
+                        ? 'rgba(99, 102, 241, 0.2)'
+                        : 'rgba(236, 72, 153, 0.2)'
+                    }
+                    className="h-full cursor-pointer hover:scale-[1.02] transition-transform duration-500 overflow-hidden group"
+                  >
+                    <div className="absolute inset-0 z-0">
+                      {product.image ? (
+                        <motion.img 
+                          whileHover={{ scale: 1.1 }}
+                          src={product.image} 
+                          alt={product.name} 
+                          className="w-full h-full object-cover transition-transform duration-700 opacity-60 group-hover:opacity-80"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-white/5 to-transparent flex items-center justify-center">
+                          <span className="text-8xl font-black text-white/[0.03] select-none">{product.article.split('-')[0]}</span>
+                        </div>
                       )}
-                      <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center opacity-40 group-hover:opacity-100 transition-opacity">
-                        <ArrowRight size={16} />
-                      </div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
                     </div>
 
-                    <div className="mt-auto">
-                      <p className="text-sm text-white/50 mb-1 font-medium tracking-wide uppercase">
-                        {product.category}
-                      </p>
-                      <h3 className="text-2xl font-bold mb-2 uppercase tracking-tighter">{product.name}</h3>
-                      <div className="flex items-center justify-between">
-                        <p className="text-xl font-light text-white/80">
-                          ${product.price}
+                    <div className="p-8 flex flex-col h-full justify-between relative z-10 group">
+                      <div className="flex justify-between items-start">
+                        <div className="flex flex-col gap-2">
+                          {product.tag && (
+                            <span className="w-fit px-3 py-1 text-[10px] font-black uppercase tracking-widest bg-white/10 backdrop-blur-md rounded-full border border-white/10 text-white/90">
+                              {product.tag}
+                            </span>
+                          )}
+                          {isOutOfStock && (
+                            <span className="w-fit px-3 py-1 text-[10px] font-black uppercase tracking-widest bg-rose-500/20 backdrop-blur-md rounded-full border border-rose-500/30 text-rose-400">
+                              Sold Out
+                            </span>
+                          )}
+                        </div>
+                        <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center opacity-40 group-hover:opacity-100 transition-opacity">
+                          <ArrowRight size={16} />
+                        </div>
+                      </div>
+
+                      <div className="mt-auto">
+                        <p className="text-[10px] text-indigo-400 mb-1 font-black tracking-[0.2em] uppercase">
+                          {product.category}
                         </p>
-                        <LiquidButton
-                          variant="icon"
-                          className="w-10 h-10 p-0 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            addItem({
-                              productId: product.id,
-                              name: product.name,
-                              article: product.article,
-                              price: product.price,
-                              tax: product.tax,
-                            });
-                          }}
-                        >
-                          <ShoppingBag size={16} />
-                        </LiquidButton>
+                        <h3 className="text-2xl md:text-3xl font-bold mb-2 uppercase tracking-tighter leading-none">{product.name}</h3>
+                        <div className="flex items-center justify-between">
+                          <p className="text-xl font-light text-white/80">
+                            ${product.price}
+                          </p>
+                          <LiquidButton
+                            variant="icon"
+                            disabled={isOutOfStock}
+                            className={cn(
+                              "w-10 h-10 p-0 transition-all translate-y-2 lg:opacity-0 lg:group-hover:opacity-100 lg:group-hover:translate-y-0",
+                              isOutOfStock ? "opacity-20 cursor-not-allowed" : "opacity-100"
+                            )}
+                            onClick={(e) => {
+                              if (hasVariants) return; // Link will handle redirect
+                              e.preventDefault();
+                              e.stopPropagation();
+                              addItem({
+                                productId: product.id,
+                                name: product.name,
+                                article: product.article,
+                                price: product.price,
+                                tax: product.tax,
+                                image: product.image
+                              });
+                            }}
+                          >
+                            {hasVariants ? <ArrowRight size={16} /> : <ShoppingBag size={16} />}
+                          </LiquidButton>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </ResinCard>
-              </Link>
-            ))}
+                  </ResinCard>
+                </Link>
+              );
+            })}
           </div>
         </section>
       </main>

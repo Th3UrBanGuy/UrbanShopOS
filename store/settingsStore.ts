@@ -48,6 +48,12 @@ export interface BillDesign {
   headerPattern: 'none' | 'dots' | 'lines' | 'grid';
   accentPosition: 'top' | 'bottom' | 'both' | 'left' | 'none';
   accentWidth: number;
+
+  // Report Specific (Ledgers, Sales Lists)
+  reportHeader: string;
+  reportFooter: string;
+  showSerial: boolean;
+  reportAccentColor: string;
 }
 
 interface SettingsState {
@@ -57,6 +63,10 @@ interface SettingsState {
   lowStockThreshold: number;
   billDesign: BillDesign;
   exchangeRates: Record<string, number>;
+  isCompactView: boolean;
+  isDarkMode: boolean;
+  pushNotifications: boolean;
+  stockHoldMinutes: number;
 
   setSiteName: (name: string) => void;
   setCurrency: (cur: string) => void;
@@ -67,6 +77,10 @@ interface SettingsState {
   updateExchangeRates: (rates: Record<string, number>) => void;
   formatPrice: (amount: number) => string;
   getConvertedAmount: (amount: number) => number;
+  setCompactView: (val: boolean) => void;
+  setDarkMode: (val: boolean) => void;
+  setPushNotifications: (val: boolean) => void;
+  setStockHoldMinutes: (min: number) => void;
 }
 
 const DEFAULT_BILL: BillDesign = {
@@ -110,6 +124,11 @@ const DEFAULT_BILL: BillDesign = {
   headerPattern: 'none',
   accentPosition: 'top',
   accentWidth: 4,
+
+  reportHeader: 'Official Business Report',
+  reportFooter: 'This is a computer-generated document.',
+  showSerial: true,
+  reportAccentColor: '#6366f1',
 };
 
 export const useSettingsStore = create<SettingsState>()(
@@ -121,14 +140,18 @@ export const useSettingsStore = create<SettingsState>()(
       lowStockThreshold: 10,
       billDesign: DEFAULT_BILL,
       exchangeRates: { BDT: 1, USD: 0.0083, EUR: 0.0075, GBP: 0.0065 },
+      isCompactView: false,
+      isDarkMode: true,
+      pushNotifications: true,
+      stockHoldMinutes: 12,
 
       setSiteName: (siteName) => set({ siteName }),
       setCurrency: (currency) => set({ currency }),
       setDefaultTaxRate: (defaultTaxRate) => set({ defaultTaxRate }),
       setLowStockThreshold: (lowStockThreshold) => set({ lowStockThreshold }),
-      setBillDesign: (design) => set((state) => ({ billDesign: { ...state.billDesign, ...design } })),
+      setBillDesign: (design: Partial<BillDesign>) => set((state) => ({ billDesign: { ...state.billDesign, ...design } })),
       resetBillDesign: () => set({ billDesign: DEFAULT_BILL }),
-      updateExchangeRates: (rates) => set({ exchangeRates: rates }),
+      updateExchangeRates: (rates: Record<string, number>) => set({ exchangeRates: rates }),
       formatPrice: (amount: number) => {
         const { currency, exchangeRates } = get();
         const rate = exchangeRates[currency] || 1;
@@ -141,6 +164,22 @@ export const useSettingsStore = create<SettingsState>()(
         const rate = exchangeRates[currency] || 1;
         return amount * rate;
       },
+      setCompactView: (isCompactView) => {
+        set({ isCompactView });
+        if (typeof document !== 'undefined') {
+          if (isCompactView) document.documentElement.classList.add('compact');
+          else document.documentElement.classList.remove('compact');
+        }
+      },
+      setDarkMode: (isDarkMode) => {
+        set({ isDarkMode });
+        if (typeof document !== 'undefined') {
+          if (isDarkMode) document.documentElement.classList.add('dark');
+          else document.documentElement.classList.remove('dark');
+        }
+      },
+      setPushNotifications: (pushNotifications) => set({ pushNotifications }),
+      setStockHoldMinutes: (stockHoldMinutes) => set({ stockHoldMinutes }),
     }),
     { name: 'aero-resin-settings' }
   )

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Search, Menu, X, LockKeyhole, ShieldAlert, Unlock, Package, ChevronRight, TrendingUp, SearchIcon, Sparkles } from 'lucide-react';
+import { ShoppingBag, Menu, X, ShieldAlert, Unlock, Package, ChevronRight, SearchIcon, Sparkles, Truck, MapPin, Mail, Phone, CreditCard, Calendar, BadgeCheck, Clock, CheckCircle2, Zap, Activity, ShieldCheck, Box } from 'lucide-react';
 import LiquidButton from '@/components/LiquidButton';
 import { useCartStore } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
@@ -28,7 +28,7 @@ export default function Navbar() {
   const toggleCart = useCartStore((s) => s.toggleOpen);
 
   // Auth & Search state
-  const { isAuthenticated } = useAuthStore();
+  const {} = useAuthStore();
   const { transactions } = useSalesStore();
   const settings = useSettingsStore();
   const [searchId, setSearchId] = useState('');
@@ -331,51 +331,214 @@ export default function Navbar() {
                          </p>
                       </form>
 
-                      <AnimatePresence mode="wait">
+                       <AnimatePresence mode="wait">
                          {foundOrder ? (
                            <motion.div
                              key="result-found"
                              initial={{ opacity: 0, y: 20 }}
                              animate={{ opacity: 1, y: 0 }}
-                             className="p-6 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl relative overflow-hidden"
+                             className="flex-1 flex flex-col min-h-0"
                            >
-                              <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl -z-10" />
-                              <div className="flex justify-between items-start mb-6">
-                                <div>
-                                   <p className="text-[10px] font-black text-white/20 uppercase tracking-widest mb-1">Status</p>
-                                   <div className="flex items-center gap-2 text-emerald-400">
-                                      <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse" />
-                                      <span className="text-xs font-black uppercase tracking-wider">Secured & Processed</span>
-                                   </div>
-                                </div>
-                                <div className="text-right">
-                                   <p className="text-[10px] font-black text-white/20 uppercase tracking-widest mb-1">Total</p>
-                                   <p className="text-xl font-black">{settings.formatPrice(foundOrder.total)}</p>
-                                </div>
-                              </div>
+                              <div className="flex-1 overflow-y-auto no-scrollbar pb-32 space-y-4">
+                                 {/* Status Hero Card - Full Width */}
+                                 <motion.div 
+                                   whileHover={{ scale: 0.995 }}
+                                   className="p-8 rounded-[2.5rem] bg-gradient-to-br from-indigo-500/10 via-white/[0.03] to-transparent border border-white/10 relative overflow-hidden group shadow-2xl"
+                                 >
+                                    <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                                       <Activity size={80} className="text-indigo-400" />
+                                    </div>
+                                    
+                                    <div className="relative z-10">
+                                       <div className="flex justify-between items-start mb-10">
+                                          <div>
+                                             <div className="flex items-center gap-3 mb-2">
+                                                <div className="px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/30">
+                                                   <p className="text-[10px] font-black text-indigo-300 uppercase tracking-widest">{foundOrder.status}</p>
+                                                </div>
+                                                {foundOrder.status === 'processing' && (
+                                                   <div className="flex gap-1">
+                                                      <div className="w-1 h-1 rounded-full bg-indigo-500 animate-ping" />
+                                                      <div className="w-1 h-1 rounded-full bg-indigo-500 animate-ping delay-75" />
+                                                      <div className="w-1 h-1 rounded-full bg-indigo-500 animate-ping delay-150" />
+                                                   </div>
+                                                )}
+                                             </div>
+                                             <h3 className="text-3xl font-black tracking-tighter uppercase italic italic-none drop-shadow-lg">
+                                                Track <span className="text-indigo-400">Sequence</span>
+                                             </h3>
+                                          </div>
+                                          <div className="text-right">
+                                             <p className="text-[10px] font-black text-white/20 uppercase tracking-widest mb-1">Total Value</p>
+                                             <p className="text-2xl font-black text-white drop-shadow-md">{settings.formatPrice(foundOrder.total)}</p>
+                                          </div>
+                                       </div>
 
-                              <div className="space-y-3 mb-6">
-                                {foundOrder.items.map((item, i) => (
-                                  <div key={i} className="flex justify-between text-[11px] font-bold">
-                                     <span className="text-white/60">{item.name} <span className="text-[9px] text-white/20 ml-1">x{item.quantity}</span></span>
-                                     <span className="text-white/40">{settings.formatPrice(item.price * item.quantity)}</span>
-                                  </div>
-                                ))}
-                              </div>
+                                       <div className="relative h-1.5 w-full bg-white/5 rounded-full overflow-hidden mb-4">
+                                          <motion.div 
+                                             initial={{ width: 0 }}
+                                             animate={{ 
+                                                width: foundOrder.status === 'completed' || foundOrder.status === 'delivered' ? '100%' :
+                                                       foundOrder.status === 'shipped' ? '75%' :
+                                                       foundOrder.status === 'processing' ? '50%' : '25%' 
+                                             }}
+                                             transition={{ duration: 1.5, ease: "easeOut" }}
+                                             className="absolute inset-y-0 left-0 bg-gradient-to-r from-indigo-600 to-indigo-400 shadow-[0_0_20px_rgba(99,102,241,0.6)]"
+                                          />
+                                       </div>
+                                       
+                                       <div className="flex justify-between px-1">
+                                          {['Pending', 'Process', 'Ship', 'Finish'].map((label, idx) => {
+                                             const statuses = ['pending', 'processing', 'shipped', 'delivered', 'completed'];
+                                             const currentIdx = statuses.indexOf(foundOrder.status);
+                                             const isPast = currentIdx >= idx;
+                                             return (
+                                                <span key={label} className={cn(
+                                                   "text-[8px] font-black uppercase tracking-tighter transition-colors duration-500",
+                                                   isPast ? "text-indigo-400" : "text-white/10"
+                                                )}>
+                                                   {label}
+                                                </span>
+                                             );
+                                          })}
+                                       </div>
+                                    </div>
+                                 </motion.div>
 
-                              <div className="pt-4 border-t border-white/5 flex justify-between items-center">
-                                 <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">
-                                   ID: {foundOrder.id}
-                                 </p>
-                                 <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">
-                                   {new Date(foundOrder.timestamp).toLocaleDateString()}
-                                 </p>
+                                 {/* Intelligence Grid - 2 Columns on MD */}
+                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {/* Logistics Card */}
+                                    <div className="p-6 rounded-[2rem] bg-white/[0.03] border border-white/5 backdrop-blur-md flex flex-col justify-between group hover:bg-white/[0.05] transition-all duration-500">
+                                       <div>
+                                          <div className="flex items-center gap-2 mb-6">
+                                             <div className="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                                                <Truck size={14} />
+                                             </div>
+                                             <h5 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Logistics</h5>
+                                          </div>
+                                          
+                                          {foundOrder.deliveryAddress ? (
+                                             <div className="space-y-4">
+                                                <div className="flex gap-3">
+                                                   <MapPin size={14} className="text-indigo-400 shrink-0 mt-1" />
+                                                   <div>
+                                                      <p className="text-[11px] font-bold text-white/80 leading-relaxed">{foundOrder.deliveryAddress}</p>
+                                                      <p className="text-[9px] font-black text-indigo-400/60 uppercase tracking-widest mt-1">{foundOrder.deliveryCity}</p>
+                                                   </div>
+                                                </div>
+                                             </div>
+                                          ) : (
+                                             <div className="py-4 flex flex-col items-center justify-center text-center">
+                                                <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/10 mb-2">
+                                                   <Package size={16} />
+                                                </div>
+                                                <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">In-Store Collection</p>
+                                             </div>
+                                          )}
+                                       </div>
+                                       
+                                       <div className="mt-6 pt-4 border-t border-white/5 flex justify-between items-center text-[8px] font-black text-white/20 uppercase tracking-widest">
+                                          <span>Zone: {foundOrder.deliveryCity || 'Alpha-1'}</span>
+                                          <div className="flex gap-1">
+                                             <div className="w-1 h-1 rounded-full bg-white/20" />
+                                             <div className="w-1 h-1 rounded-full bg-white/20" />
+                                          </div>
+                                       </div>
+                                    </div>
+
+                                    {/* Identity & Payment Card */}
+                                    <div className="p-6 rounded-[2rem] bg-white/[0.03] border border-white/5 backdrop-blur-md space-y-6 hover:bg-white/[0.05] transition-all duration-500">
+                                       <div className="flex items-center gap-2 mb-2">
+                                          <div className="w-8 h-8 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+                                             <CreditCard size={14} />
+                                          </div>
+                                          <h5 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Checkout ID</h5>
+                                       </div>
+
+                                       <div className="space-y-4">
+                                          <div className="flex items-center gap-3">
+                                             <div className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-white/40 shrink-0">
+                                                <Phone size={12} />
+                                             </div>
+                                             <div>
+                                                <p className="text-[8px] font-black text-white/20 uppercase tracking-widest">Contact Signal</p>
+                                                <p className="text-[10px] font-bold text-white/80">{foundOrder.customerPhone || 'DIRECT POS'}</p>
+                                             </div>
+                                          </div>
+                                          <div className="flex items-center gap-3">
+                                             <div className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-white/40 shrink-0">
+                                                <ShieldCheck size={12} />
+                                             </div>
+                                             <div>
+                                                <p className="text-[8px] font-black text-white/20 uppercase tracking-widest">Payment Protocol</p>
+                                                <p className="text-[10px] font-black text-purple-400 uppercase">{foundOrder.paymentMethod}</p>
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
+
+                                 {/* Manifest Block - High Density Vault */}
+                                 <div className="p-6 rounded-[2.5rem] bg-white/[0.03] border border-white/5 backdrop-blur-md relative overflow-hidden group">
+                                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                                       <Box size={40} className="text-white" />
+                                    </div>
+                                    
+                                    <h5 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 mb-6 flex items-center gap-2">
+                                       <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.8)]" />
+                                       Vault manifest
+                                    </h5>
+
+                                    <div className="space-y-3">
+                                       {foundOrder.items.map((item, i) => (
+                                         <motion.div 
+                                           key={i} 
+                                           whileHover={{ x: 5 }}
+                                           className="flex justify-between items-center p-3 rounded-2xl bg-white/[0.02] border border-white/5 group/item transition-colors hover:bg-white/[0.04]"
+                                         >
+                                            <div className="flex items-center gap-4">
+                                               <div className="relative">
+                                                  <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-[11px] font-black z-10 relative">
+                                                     {item.quantity}
+                                                  </div>
+                                                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-indigo-500 rounded-full border-2 border-black/50 z-20" />
+                                               </div>
+                                               <div>
+                                                  <p className="text-[11px] font-bold text-white/90">{item.name}</p>
+                                                  {item.selectedVariant && (
+                                                    <div className="flex items-center gap-2 mt-1">
+                                                       <span className="px-1.5 py-0.5 rounded-md bg-white/5 text-[7px] font-black text-indigo-400 uppercase tracking-widest italic">
+                                                          {item.selectedVariant.color}
+                                                       </span>
+                                                       <span className="px-1.5 py-0.5 rounded-md bg-white/5 text-[7px] font-black text-white/30 uppercase tracking-widest">
+                                                          SZ:{item.selectedVariant.size}
+                                                       </span>
+                                                    </div>
+                                                  )}
+                                               </div>
+                                            </div>
+                                            <div className="text-right">
+                                               <p className="text-[10px] font-black text-white/60">{settings.formatPrice(item.price * item.quantity)}</p>
+                                               <p className="text-[7px] font-bold text-white/10 uppercase tracking-widest mt-0.5">Verified</p>
+                                            </div>
+                                         </motion.div>
+                                       ))}
+                                    </div>
+                                 </div>
+
+                                 {/* Technical Log Footer */}
+                                 <div className="pt-4 flex flex-col items-center gap-4">
+                                    <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/5 text-[9px] font-black text-white/20 tracking-wider">
+                                       <Calendar size={10} />
+                                       SEQUENCE INITIATED: {new Date(foundOrder.timestamp).toLocaleDateString()}
+                                    </div>
+                                    <p className="text-[8px] font-black text-white/5 uppercase tracking-[0.5em]">T-ID: {foundOrder.id}</p>
+                                    <div className="h-10" /> {/* Spacer */}
+                                 </div>
                               </div>
-                           </motion.div>
+                             </motion.div>
                          ) : searchId && !isSearching ? (
                             <motion.div
-                              key="not-found"
-                              initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
                               className="text-center py-12"
                             >

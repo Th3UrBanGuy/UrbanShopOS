@@ -1,6 +1,15 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { inventoryService } from '@/lib/services/inventoryService';
+import { useSettingsStore } from './settingsStore';
+
+export interface StockHold {
+  sessionId: string;
+  color: string;
+  size: string;
+  quantity: number;
+  expiresAt: number;
+}
 
 export interface ColorVariant {
   color: string;
@@ -28,6 +37,7 @@ export interface InventoryProduct {
   showInEcom: boolean;
   image?: string;
   description?: string;
+  holds?: StockHold[];
   variants: ColorVariant[];
 }
 
@@ -94,15 +104,21 @@ let firebaseLoaded = false;
 
 interface InventoryState {
   products: InventoryProduct[];
-  loading: boolean;
   initialized: boolean;
+  loading: boolean;
   firebaseSynced: boolean;
+  sessionId: string;
+  
   initialize: () => Promise<void>;
   setProducts: (products: InventoryProduct[]) => void;
   syncToFirebase: () => Promise<void>;
   updateStock: (id: number, newStock: number) => Promise<void>;
   decrementStock: (id: number, quantity: number) => Promise<void>;
-  decrementVariantStock: (productId: number, color: string, size: string, quantity: number) => Promise<void>;
+  decrementVariantStock: (productId: number, color: string, size: string, quantity: number, sessionId?: string) => Promise<void>;
+  addHold: (productId: number, color: string, size: string, quantity: number, sessionId: string) => Promise<void>;
+  removeHold: (productId: number, color: string, size: string, sessionId: string) => Promise<void>;
+  cleanupHolds: (productId: number) => Promise<void>;
+  getAvailableStock: (productId: number, color: string, size: string) => number;
   addProduct: (product: InventoryProduct) => Promise<void>;
   updateProduct: (product: InventoryProduct) => Promise<void>;
 }
@@ -115,21 +131,23 @@ export const useInventoryStore = create<InventoryState>()(
       initialized: false,
       firebaseSynced: false,
 
+      sessionId: `sess-${Math.random().toString(36).substr(2, 9)}`,
+
       initialize: async () => {
+        if (get().initialized && get().firebaseSynced) return;
+        
         set({ loading: true });
         try {
-          if (!firebaseLoaded) {
-            const products = await inventoryService.getAll();
-            if (products.length > 0) {
-              set({ products, initialized: true, firebaseSynced: true, loading: false });
-              firebaseLoaded = true;
-              return;
-            }
-          }
+          // Setup real-time listener
+          inventoryService.subscribeToProducts((products) => {
+            set({ products, initialized: true, firebaseSynced: true, loading: false });
+          });
+          firebaseLoaded = true;
         } catch (e) {
-          console.log('Firebase unavailable, using local data');
+          console.error('Firebase subscription failed, attempting fallback:', e);
+          const products = await inventoryService.getAll();
+          set({ products, initialized: true, loading: false });
         }
-        set({ initialized: true, loading: false });
       },
 
       setProducts: (products) => set({ products }),
@@ -170,7 +188,7 @@ export const useInventoryStore = create<InventoryState>()(
         }
       },
 
-      decrementVariantStock: async (productId: number, color: string, size: string, quantity: number) => {
+      decrementVariantStock: async (productId: number, color: string, size: string, quantity: number, sessionId?: string) => {
         set((state) => ({
           products: state.products.map(p => {
             if (p.id !== productId) return p;
@@ -178,7 +196,7 @@ export const useInventoryStore = create<InventoryState>()(
             // Update total stock
             const newTotalStock = Math.max(0, p.stock - quantity);
             
-            // Update variant stock if variants exist
+            // Update variant stock
             const newVariants = p.variants.map(v => {
               if (v.color !== color) return v;
               const newSizes = v.sizes.map(s => {
@@ -188,17 +206,109 @@ export const useInventoryStore = create<InventoryState>()(
               return { ...v, sizes: newSizes };
             });
 
-            return { ...p, stock: newTotalStock, variants: newVariants };
+            // Also remove any hold for this session
+            const newHolds = sessionId 
+              ? (p.holds || []).filter(h => !(h.sessionId === sessionId && h.color === color && h.size === size))
+              : p.holds;
+
+            return { ...p, stock: newTotalStock, variants: newVariants, holds: newHolds };
           })
         }));
 
         try {
-          // Sync with Firestore (assuming the whole product is synced)
           const product = get().products.find(p => p.id === productId);
           if (product) await inventoryService.update(productId, product);
         } catch (e) {
-          console.log('Offline: variant stock decrement queued');
+          console.log('Stock decrement queued');
         }
+      },
+
+      addHold: async (productId: number, color: string, size: string, quantity: number, sessionId: string) => {
+        const holdMinutes = useSettingsStore.getState().stockHoldMinutes;
+        const expiresAt = Date.now() + (holdMinutes * 60 * 1000);
+        
+        let updatedHolds: StockHold[] = [];
+        
+        set((state) => ({
+          products: state.products.map(p => {
+            if (p.id !== productId) return p;
+            const currentHolds = p.holds || [];
+            // Handle quantity addition instead of just replacement
+            const existingHoldIndex = currentHolds.findIndex(h => h.sessionId === sessionId && h.color === color && h.size === size);
+            
+            let newHolds;
+            if (existingHoldIndex >= 0) {
+              newHolds = currentHolds.map((h, i) => i === existingHoldIndex ? { ...h, quantity: h.quantity + quantity, expiresAt } : h);
+            } else {
+              newHolds = [...currentHolds, { sessionId, color, size, quantity, expiresAt }];
+            }
+            updatedHolds = newHolds;
+            return { ...p, holds: newHolds };
+          })
+        }));
+
+        try {
+          await inventoryService.update(productId, { holds: updatedHolds });
+        } catch (e) {
+          console.error("Hold persistence failed:", e);
+        }
+      },
+
+      removeHold: async (productId: number, color: string, size: string, sessionId: string) => {
+        let updatedHolds: StockHold[] = [];
+        
+        set((state) => ({
+          products: state.products.map(p => {
+            if (p.id !== productId) return p;
+            const newHolds = (p.holds || []).filter(h => !(h.sessionId === sessionId && h.color === color && h.size === size));
+            updatedHolds = newHolds;
+            return { ...p, holds: newHolds };
+          })
+        }));
+
+        try {
+          await inventoryService.update(productId, { holds: updatedHolds });
+        } catch (e) {}
+      },
+
+      cleanupHolds: async (productId: number) => {
+        const now = Date.now();
+        let changed = false;
+        
+        set((state) => ({
+          products: state.products.map(p => {
+            if (p.id !== productId) return p;
+            const validHolds = (p.holds || []).filter(h => h.expiresAt > now);
+            if (validHolds.length !== (p.holds || []).length) {
+              changed = true;
+              return { ...p, holds: validHolds };
+            }
+            return p;
+          })
+        }));
+
+        if (changed) {
+          try {
+            const product = get().products.find(p => p.id === productId);
+            if (product) await inventoryService.update(productId, { holds: product.holds });
+          } catch (e) {}
+        }
+      },
+
+      getAvailableStock: (productId: number, color: string, size: string) => {
+        const product = get().products.find(p => p.id === productId);
+        if (!product) return 0;
+        
+        const variant = product.variants.find(v => v.color === color);
+        const sizeObj = variant?.sizes.find(s => s.size === size);
+        if (!sizeObj) return 0;
+        
+        const now = Date.now();
+        const activeHolds = (product.holds || [])
+          .filter(h => h.color === color && h.size === size && h.expiresAt > now)
+          .reduce((acc, h) => acc + h.quantity, 0);
+          
+        return Math.max(0, sizeObj.stock - activeHolds);
       },
 
       addProduct: async (product: InventoryProduct) => {

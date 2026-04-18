@@ -1,10 +1,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export type ExpenseCategory = 'Stock' | 'Utility' | 'Staff' | 'Rent' | 'Marketing' | 'Food' | 'Other';
+
 export interface Expense {
   id: string;
   description: string;
   amount: number;
+  category: ExpenseCategory;
   date: string;
 }
 

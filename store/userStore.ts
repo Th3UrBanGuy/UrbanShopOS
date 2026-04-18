@@ -6,11 +6,11 @@ import { userService } from '@/lib/services/userService';
 export type UserRole = 'super_admin' | 'admin' | 'user';
 
 export const ALL_MODULES: DashboardTab[] = [
-  'Hub', 'Stats', 'Inventory', 'Coupons', 'PoS', 'Khorochkhata', 'Parties', 'Settings', 'Management',
+  'Hub', 'Stats', 'Inventory', 'Coupons', 'PoS', 'Khorochkhata', 'Parties', 'Settings', 'Management', 'Users',
 ];
 
 export const MANAGEABLE_MODULES: DashboardTab[] = [
-  'Hub', 'Stats', 'Inventory', 'Coupons', 'PoS', 'Khorochkhata', 'Parties', 'Management',
+  'Hub', 'Stats', 'Inventory', 'Coupons', 'PoS', 'Khorochkhata', 'Parties', 'Management', 'Users',
 ];
 
 export interface SystemUser {
@@ -29,7 +29,7 @@ const SUPER_ADMIN: SystemUser = {
   id: 'super-admin',
   name: 'Super Admin',
   email: 'superadmin@aeroresin.com',
-  pin: '726268',
+  pin: process.env.NEXT_PUBLIC_SUPER_ADMIN_PIN || 'PIN_NOT_SET',
   role: 'super_admin',
   allowedModules: ALL_MODULES,
   createdAt: new Date().toISOString(),
@@ -89,7 +89,7 @@ export const useUserStore = create<UserStoreState>()(
 
       updateUser: async (id, patch) => {
         set((s) => ({
-          users: s.users.map(u => u.id === id && u.id !== 'super-admin' ? { ...u, ...patch } : u)
+          users: s.users.map(u => u.id === id ? { ...u, ...patch } : u)
         }));
         try {
           await userService.update(id, patch);

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Ticket, Plus, Zap, Scissors, Sparkles, Flame, Percent, DollarSign, Users, Search, ToggleLeft, ToggleRight, AlertCircle, CheckCircle2, Edit2, Settings2, CalendarClock, Package, ArrowLeft } from 'lucide-react';
+import { Ticket, Plus, Zap, Scissors, Sparkles, Flame, Percent, DollarSign, Users, Search, ToggleLeft, ToggleRight, AlertCircle, Edit2, Settings2, CalendarClock, Package, ArrowLeft } from 'lucide-react';
 import ResinCard from '@/components/ResinCard';
 import LiquidButton from '@/components/LiquidButton';
 import { useCouponStore, Coupon } from '@/store/couponStore';
@@ -28,29 +28,29 @@ function CouponTicket({ coupon, onBurn, onToggle, onEdit }: { coupon: Coupon; on
       <ResinCard
         className={cn(
           'h-full p-4 sm:p-5 flex flex-col justify-between border-dashed border-2 transition-all',
-          isActive && !maxReached ? 'border-white/20' : 'border-white/5 opacity-50'
+          isActive && !maxReached ? 'border-[var(--card-border)]' : 'border-[var(--card-border)]/20 opacity-50'
         )}
         glowingColor={isActive && !maxReached ? `var(--color-${coupon.color}-500)` : 'transparent'}
       >
         {/* Top row */}
         <div className="flex justify-between items-start shrink-0">
           <div className="flex items-center gap-2">
-            <div className={cn('p-1.5 rounded-lg bg-white/5 border border-white/10', `text-${coupon.color}-400`)}>
+            <div className={cn('p-1.5 rounded-lg bg-[var(--card-bg)]/50 border border-[var(--card-border)]', `text-${coupon.color}-400`)}>
               {coupon.type === 'percent' ? <Percent size={12} /> : <DollarSign size={12} />}
             </div>
-            <span className="text-[8px] font-black uppercase tracking-widest text-white/40">{coupon.type}</span>
+            <span className="text-[8px] font-black uppercase tracking-widest text-[var(--text-muted)]">{coupon.type}</span>
           </div>
           <div className="flex items-center gap-1">
             <button
               onClick={() => onEdit(coupon)}
-              className="text-white/20 hover:text-white transition-colors p-1"
+              className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors p-1"
               title="Edit coupon"
             >
               <Edit2 size={13} />
             </button>
             <button
               onClick={() => onBurn(coupon.id)}
-              className="text-white/20 hover:text-rose-500 transition-colors p-1"
+              className="text-[var(--text-muted)] hover:text-rose-500 transition-colors p-1"
               title="Delete coupon"
             >
               <Flame size={14} />
@@ -60,17 +60,17 @@ function CouponTicket({ coupon, onBurn, onToggle, onEdit }: { coupon: Coupon; on
 
         {/* Code + discount */}
         <div className="text-center py-3">
-          <h3 className="text-xl sm:text-2xl font-black tracking-tighter mb-1 leading-none">{coupon.code}</h3>
-          <p className="text-[11px] sm:text-sm font-bold text-white/60">
+          <h3 className="text-xl sm:text-2xl font-black tracking-tighter mb-1 leading-none text-[var(--text-primary)]">{coupon.code}</h3>
+          <p className="text-[11px] sm:text-sm font-bold text-[var(--text-muted)]">
             {coupon.type === 'percent' ? `${coupon.value}% OFF` : `$${coupon.value} OFF`}
           </p>
         </div>
 
         {/* Footer row */}
-        <div className="flex justify-between items-center pt-3 border-t border-white/5 shrink-0">
+        <div className="flex justify-between items-center pt-3 border-t border-[var(--card-border)] shrink-0">
           <div className="flex items-center gap-1.5">
-            <Users size={10} className="text-white/20" />
-            <span className="text-[8px] font-black text-white/40 uppercase">
+            <Users size={10} className="text-[var(--text-muted)]" />
+            <span className="text-[8px] font-black text-[var(--text-muted)] uppercase">
               {coupon.uses}{coupon.maxUses > 0 ? `/${coupon.maxUses}` : ''} used
             </span>
           </div>
@@ -82,7 +82,7 @@ function CouponTicket({ coupon, onBurn, onToggle, onEdit }: { coupon: Coupon; on
                 ? 'text-rose-400 bg-rose-500/10'
                 : isActive
                 ? 'text-emerald-400 bg-emerald-500/10'
-                : 'text-white/30 bg-white/5'
+                : 'text-[var(--text-muted)] bg-[var(--card-bg)]/80'
             )}
           >
             {maxReached ? (
@@ -96,8 +96,8 @@ function CouponTicket({ coupon, onBurn, onToggle, onEdit }: { coupon: Coupon; on
         </div>
 
         {/* Ticket notches */}
-        <div className="absolute top-1/2 -left-3 -translate-y-1/2 w-6 h-6 rounded-full bg-[#050508] border-r border-white/10" />
-        <div className="absolute top-1/2 -right-3 -translate-y-1/2 w-6 h-6 rounded-full bg-[#050508] border-l border-white/10" />
+        <div className="absolute top-1/2 -left-3 -translate-y-1/2 w-6 h-6 rounded-full bg-[var(--background)] border-r border-[var(--card-border)]" />
+        <div className="absolute top-1/2 -right-3 -translate-y-1/2 w-6 h-6 rounded-full bg-[var(--background)] border-l border-[var(--card-border)]" />
       </ResinCard>
     </motion.div>
   );
@@ -219,20 +219,20 @@ export default function CouponView() {
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shrink-0">
         <div className="flex items-center gap-4">
           <button 
-            onClick={() => setActiveTab('Management')}
-            className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all shadow-resin"
+            onClick={() => setActiveTab('Settings')}
+            className="w-10 h-10 rounded-2xl bg-[var(--card-bg)] border border-[var(--card-border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--card-bg)]/80 transition-all shadow-resin"
           >
             <ArrowLeft size={18} />
           </button>
           <div>
-            <h2 className="text-2xl md:text-3xl font-black tracking-tighter uppercase leading-none mb-1">Offers</h2>
-            <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em]">Campaign & Coupon Hub</p>
+            <h2 className="text-2xl md:text-3xl font-black tracking-tighter uppercase leading-none mb-1 text-[var(--text-primary)]">Offers</h2>
+            <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em]">Campaign & Coupon Hub</p>
           </div>
         </div>
         <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto no-scrollbar pb-2 md:pb-0">
-          <ResinCard className="px-4 py-2 flex items-center gap-3 shrink-0" glowingColor="rgba(56,189,248,0.1)">
-            <Zap size={14} className="text-cyan-400" />
-            <p className="text-xs font-black tracking-tight">{coupons.filter(c => c.status === 'Active').length} active</p>
+          <ResinCard className="px-4 py-2 flex items-center gap-3 shrink-0" glowingColor="var(--accent-glow)">
+            <Zap size={14} className="text-[var(--accent)]" />
+            <p className="text-xs font-black tracking-tight text-[var(--text-primary)]">{coupons.filter(c => c.status === 'Active').length} active</p>
           </ResinCard>
         </div>
       </div>
@@ -245,13 +245,13 @@ export default function CouponView() {
             {editingId && (
               <button 
                 onClick={resetForm}
-                className="absolute top-6 right-6 text-[9px] font-black uppercase text-white/30 hover:text-white transition-colors border border-white/5 bg-white/5 rounded-full px-2 py-1 flex items-center gap-1"
+                className="absolute top-6 right-6 text-[9px] font-black uppercase text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors border border-[var(--card-border)] bg-[var(--card-bg)] rounded-full px-2 py-1 flex items-center gap-1"
               >
                 Cancel Edit
               </button>
             )}
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-6 flex items-center gap-2">
-              {editingId ? <Edit2 size={14} className="text-indigo-400" /> : <Scissors size={14} />} 
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-6 flex items-center gap-2">
+              {editingId ? <Edit2 size={14} className="text-[var(--accent)]" /> : <Scissors size={14} />} 
               {editingId ? 'Edit Coupon' : 'New Coupon'}
             </h4>
 
@@ -259,28 +259,28 @@ export default function CouponView() {
 
               {/* Code input */}
               <div className="space-y-1.5">
-                <label className="text-[9px] font-black text-white/20 uppercase ml-1">Coupon Code</label>
+                <label className="text-[9px] font-black text-[var(--text-muted)] uppercase ml-1">Coupon Code</label>
                 <input
                   type="text"
                   placeholder="e.g. SUMMER2026"
                   value={code}
                   onChange={e => { setCode(e.target.value.toUpperCase().replace(/\s/g, '')); setFormError(null); }}
                   maxLength={20}
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-3.5 px-5 text-sm font-black outline-none focus:border-indigo-500/40 transition-all uppercase tracking-widest"
+                  className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-2xl py-3.5 px-5 text-sm font-black outline-none focus:border-[var(--accent)]/40 transition-all uppercase tracking-widest text-[var(--text-primary)]"
                 />
               </div>
 
               {/* Type selector */}
               <div className="space-y-1.5">
-                <label className="text-[9px] font-black text-white/20 uppercase ml-1">Discount Type</label>
+                <label className="text-[9px] font-black text-[var(--text-muted)] uppercase ml-1">Discount Type</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => setType('percent')}
                     className={cn(
                       'py-3 rounded-xl flex items-center justify-center gap-2 text-xs font-black transition-all border',
                       type === 'percent'
-                        ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300'
-                        : 'bg-white/5 border-white/10 text-white/30 hover:border-white/20'
+                        ? 'bg-[var(--accent)]/20 border-[var(--accent)]/40 text-[var(--accent)]'
+                        : 'bg-[var(--card-bg)] border-[var(--card-border)] text-[var(--text-muted)] hover:border-[var(--text-primary)]'
                     )}
                   >
                     <Percent size={14} /> % Off
@@ -291,7 +291,7 @@ export default function CouponView() {
                       'py-3 rounded-xl flex items-center justify-center gap-2 text-xs font-black transition-all border',
                       type === 'fixed'
                         ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
-                        : 'bg-white/5 border-white/10 text-white/30 hover:border-white/20'
+                        : 'bg-[var(--card-bg)] border-[var(--card-border)] text-[var(--text-muted)] hover:border-[var(--text-primary)]'
                     )}
                   >
                     <DollarSign size={14} /> Fixed $
@@ -302,7 +302,7 @@ export default function CouponView() {
               {/* Value + Max Uses */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-[9px] font-black text-white/20 uppercase ml-1">
+                  <label className="text-[9px] font-black text-[var(--text-muted)] uppercase ml-1">
                     {type === 'percent' ? 'Percent (%)' : 'Amount ($)'}
                   </label>
                   <input
@@ -312,18 +312,18 @@ export default function CouponView() {
                     onChange={e => { setValue(e.target.value); setFormError(null); }}
                     min="0"
                     max={type === 'percent' ? 100 : undefined}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 px-4 text-sm font-black outline-none focus:border-indigo-500/40 transition-all"
+                    className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-2xl py-3 px-4 text-sm font-black outline-none focus:border-[var(--accent)]/40 transition-all text-[var(--text-primary)]"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[9px] font-black text-white/20 uppercase ml-1">Max Uses (0=∞)</label>
+                  <label className="text-[9px] font-black text-[var(--text-muted)] uppercase ml-1">Max Uses (0=∞)</label>
                   <input
                     type="number"
                     placeholder="0"
                     value={maxUses}
                     onChange={e => setMaxUses(e.target.value)}
                     min="0"
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 px-4 text-sm font-black outline-none focus:border-indigo-500/40 transition-all"
+                    className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-2xl py-3 px-4 text-sm font-black outline-none focus:border-[var(--accent)]/40 transition-all text-[var(--text-primary)]"
                   />
                 </div>
               </div>
@@ -332,7 +332,7 @@ export default function CouponView() {
               <div className="border-t border-white/5 pt-4">
                  <button 
                    onClick={() => setShowAdvanced(!showAdvanced)}
-                   className="w-full flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-colors"
+                   className="w-full flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
                  >
                    <span className="flex items-center gap-2"><Settings2 size={12} /> Advanced Setup</span>
                    <span>{showAdvanced ? '-' : '+'}</span>
@@ -342,44 +342,44 @@ export default function CouponView() {
               <AnimatePresence>
                  {showAdvanced && (
                     <motion.div 
-                      initial={{ height: 0, opacity: 0 }} 
-                      animate={{ height: 'auto', opacity: 1 }} 
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      className="space-y-4 overflow-hidden border-l-2 border-indigo-500/30 pl-4 py-2"
+                      className="space-y-4 overflow-hidden"
                     >
                        <div className="space-y-1.5">
-                          <label className="text-[9px] font-black text-white/20 uppercase ml-1 flex items-center gap-1.5"><Package size={10} /> Target Product</label>
+                          <label className="text-[9px] font-black text-[var(--text-muted)] uppercase ml-1 flex items-center gap-1.5"><Package size={10} /> Target Product</label>
                           <select 
                             value={applicableProductId || ''} 
                             onChange={(e) => setApplicableProductId(e.target.value ? Number(e.target.value) : null)}
-                            className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-xs font-black outline-none focus:border-indigo-500/40 transition-all text-white appearance-none"
+                            className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl py-3 px-4 text-xs font-black outline-none focus:border-[var(--accent)]/40 transition-all text-[var(--text-primary)] appearance-none"
                           >
-                            <option value="" className="bg-[#0f111a]">Any Product</option>
+                            <option value="" className="bg-[var(--background)]">Any Product</option>
                             {products.map(p => (
-                               <option key={p.id} value={p.id} className="bg-[#0f111a]">{p.name}</option>
+                               <option key={p.id} value={p.id} className="bg-[var(--background)]">{p.name}</option>
                             ))}
                           </select>
                        </div>
 
                        <div className="grid grid-cols-2 gap-3">
                          <div className="space-y-1.5">
-                            <label className="text-[9px] font-black text-white/20 uppercase ml-1">Min. Quantity</label>
+                            <label className="text-[9px] font-black text-[var(--text-muted)] uppercase ml-1">Min. Quantity</label>
                             <input 
                               type="number" 
                               placeholder="0 (None)" 
                               value={minQuantity || ''}
                               onChange={e => setMinQuantity(e.target.value ? parseInt(e.target.value) : null)}
                               min="0"
-                              className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-xs font-black outline-none"
+                              className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl py-3 px-4 text-xs font-black outline-none text-[var(--text-primary)]"
                             />
                          </div>
                          <div className="space-y-1.5">
-                            <label className="text-[9px] font-black text-white/20 uppercase ml-1 flex items-center gap-1.5"><CalendarClock size={10} /> Expiration</label>
+                            <label className="text-[9px] font-black text-[var(--text-muted)] uppercase ml-1 flex items-center gap-1.5"><CalendarClock size={10} /> Expiration</label>
                             <input 
                               type="date" 
                               value={expiresAt || ''}
                               onChange={e => setExpiresAt(e.target.value || null)}
-                              className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-[10px] font-black outline-none [color-scheme:dark]"
+                              className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl py-3 px-4 text-[10px] font-black outline-none theme-dark:color-scheme-dark text-[var(--text-primary)]"
                             />
                          </div>
                        </div>
@@ -389,7 +389,7 @@ export default function CouponView() {
 
               {/* Color picker */}
               <div className="space-y-1.5">
-                <label className="text-[9px] font-black text-white/20 uppercase ml-1">Ticket Color</label>
+                <label className="text-[9px] font-black text-[var(--text-muted)] uppercase ml-1">Ticket Color</label>
                 <div className="flex gap-2 flex-wrap">
                   {COUPON_COLORS.map(c => (
                     <button
@@ -423,7 +423,7 @@ export default function CouponView() {
               <LiquidButton
                 onClick={handleCreate}
                 disabled={isCreating}
-                className="w-full py-4 text-[10px] font-black uppercase tracking-widest gap-2 bg-indigo-600 border-indigo-500"
+                className="w-full py-4 text-[10px] font-black uppercase tracking-widest gap-2 bg-[var(--accent)] border-[var(--accent)] text-white"
               >
                 {isCreating ? <Sparkles size={14} className="animate-spin" /> : editingId ? <Edit2 size={14} /> : <Plus size={14} />}
                 {isCreating ? 'Saving...' : editingId ? 'Save Changes' : 'Create Coupon'}
@@ -435,8 +435,8 @@ export default function CouponView() {
           <ResinCard className="p-5 flex items-center gap-4" glowingColor="rgba(168,85,247,0.08)">
             <Sparkles size={18} className="text-purple-400 shrink-0" />
             <div>
-              <p className="text-[10px] font-black text-white/60 mb-0.5">{editingId ? 'Updating' : 'Auto-expire'} when maxed</p>
-              <p className="text-[8px] text-white/20 uppercase tracking-widest">Set Max Uses to 0 for unlimited</p>
+              <p className="text-[10px] font-black text-[var(--text-muted)] mb-0.5">{editingId ? 'Updating' : 'Auto-expire'} when maxed</p>
+              <p className="text-[8px] text-[var(--text-muted)] uppercase tracking-widest">Set Max Uses to 0 for unlimited</p>
             </div>
           </ResinCard>
         </div>
@@ -446,13 +446,13 @@ export default function CouponView() {
 
           {/* Search bar */}
           <div className="relative shrink-0">
-            <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" />
+            <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
             <input
               type="text"
               placeholder="Search coupon codes..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full bg-white/5 border border-white/5 rounded-2xl py-3 pl-10 pr-4 text-sm font-bold outline-none focus:border-indigo-500/30 transition-all"
+              className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-2xl py-3 pl-10 pr-4 text-sm font-bold outline-none focus:border-[var(--accent)]/30 transition-all text-[var(--text-primary)]"
             />
           </div>
 

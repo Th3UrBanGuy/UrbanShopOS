@@ -7,7 +7,7 @@ Started: 2026-04-10T23:40:00+06:00
 - Styling uses Vanilla CSS + Tailwind utility classes where requested.
 - Icons are from `lucide-react`.
 - Animations are handled by `framer-motion`.
-- Dashboard PIN is fixed at `726268`.
+- Dashboard PIN is managed via environment variables.
 
 ---
 *Initialized Ralph loop environment.*

@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { Merriweather, Inter } from 'next/font/google'
 import './globals.css'
+import ThemeProvider from '@/components/ThemeProvider'
+import InventoryInitializer from '@/components/InventoryInitializer'
 
 const merriweather = Merriweather({
   weight: ['300', '400', '700', '900'],
@@ -28,7 +30,10 @@ export default function RootLayout({
       <body
         className={`${merriweather.variable} ${inter.variable} antialiased font-sans`}
       >
-        {children}
+        <ThemeProvider>
+          <InventoryInitializer />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   )

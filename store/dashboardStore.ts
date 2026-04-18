@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type DashboardTab = 'Hub' | 'Stats' | 'Inventory' | 'Coupons' | 'PoS' | 'Khorochkhata' | 'Parties' | 'Settings' | 'Management';
+export type DashboardTab = 'Hub' | 'Stats' | 'Inventory' | 'Coupons' | 'PoS' | 'Khorochkhata' | 'Parties' | 'Settings' | 'Management' | 'Users';
 
 interface DashboardState {
   activeTab: DashboardTab;

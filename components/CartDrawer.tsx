@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, 
@@ -15,7 +15,6 @@ import {
   ChevronLeft,
   User,
   CreditCard,
-  MapPin,
   Ticket,
   BadgeCheck,
   BadgeAlert,
@@ -30,9 +29,10 @@ import { useSettingsStore } from '@/store/settingsStore';
 import { useCouponStore, Coupon } from '@/store/couponStore';
 import LiquidButton from '@/components/LiquidButton';
 import { cn } from '@/lib/utils';
+import { printReceipt } from '@/lib/printReceipt';
 
 export default function CartDrawer() {
-  const { items, isOpen, setOpen, removeItem, updateQuantity, clearCart, getSubtotal, getTaxTotal, getTotal } = useCartStore();
+  const { items, isOpen, setOpen, removeItem, updateQuantity, clearCart, getSubtotal, getTaxTotal } = useCartStore();
   const { decrementStock } = useInventoryStore();
   const { addTransaction } = useSalesStore();
   const settings = useSettingsStore();
@@ -41,10 +41,23 @@ export default function CartDrawer() {
   const [view, setView] = useState<'cart' | 'checkout' | 'success'>('cart');
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
+  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [deliveryCity, setDeliveryCity] = useState('');
   const [transactionId, setTransactionId] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
   const [showPhoneToast, setShowPhoneToast] = useState(false);
+  
+  // Snapshot for success view to fix $0 bug
+  const [completedOrder, setCompletedOrder] = useState<{
+    items: any[];
+    subtotal: number;
+    taxTotal: number;
+    total: number;
+    discount: number;
+    appliedCoupon: Coupon | null;
+    id: string;
+  } | null>(null);
 
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
@@ -83,31 +96,60 @@ export default function CartDrawer() {
 
   const handleCheckout = () => {
     if (items.length === 0) return;
+    
+    // Validation
+    if (!customerName || !customerPhone || !deliveryAddress || !deliveryCity) {
+      alert('Please complete all identification and delivery address fields.');
+      return;
+    }
+    
+    if (!paymentMethod) {
+      alert('Please select an authorization portal (payment method).');
+      return;
+    }
+
     setIsProcessing(true);
     
+    // Snapshot details before clearing cart
+    const orderDetails = {
+      items: [...items],
+      subtotal,
+      taxTotal,
+      total,
+      discount: discountAmount,
+      appliedCoupon,
+      id: `TXN-${Math.floor(Math.random() * 1000000)}`
+    };
+
     // Simulate payment processing
     setTimeout(() => {
-      const newId = `TXN-${Math.floor(Math.random() * 1000000)}`;
-      setTransactionId(newId);
+      setTransactionId(orderDetails.id);
+      setCompletedOrder(orderDetails);
 
       // Record transaction
       addTransaction({
-        id: newId,
-        items: [...items],
-        subtotal,
-        taxTotal,
-        total,
+        id: orderDetails.id,
+        items: orderDetails.items,
+        subtotal: orderDetails.subtotal,
+        taxTotal: orderDetails.taxTotal,
+        total: orderDetails.total,
         paymentMethod: paymentMethod || 'Online Payment',
         timestamp: new Date().toISOString(),
-        customerName: customerName || 'Online Customer',
-        customerPhone: customerPhone || undefined,
+        customerName,
+        customerPhone,
+        deliveryAddress,
+        deliveryCity,
         channel: 'online',
         status: 'pending'
       });
 
-      // Decrement inventory stock
-      items.forEach(item => {
-        decrementStock(item.productId, item.quantity);
+      const { decrementStock, decrementVariantStock } = useInventoryStore.getState();
+      orderDetails.items.forEach(item => {
+        if (item.selectedVariant) {
+          decrementVariantStock(item.productId, item.selectedVariant.color, item.selectedVariant.size, item.quantity);
+        } else {
+          decrementStock(item.productId, item.quantity);
+        }
       });
 
       // Increment coupon usage
@@ -122,206 +164,38 @@ export default function CartDrawer() {
   };
 
   const handlePrint = () => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
+    if (!transactionId) return;
 
-    const { billDesign } = settings;
-    const date = new Date().toLocaleDateString();
-    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Receipt - ${transactionId}</title>
-          <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@400;700&family=Playfair+Display:wght@400;900&display=swap');
-            
-            :root {
-              --accent: ${billDesign.accentColor};
-              --text: ${billDesign.textColor};
-              --muted: ${billDesign.mutedColor};
-              --bg: ${billDesign.bgColor};
-              --border: ${billDesign.borderColor};
-            }
-
-            body { 
-              font-family: ${billDesign.fontFamily === 'mono' ? "'JetBrains Mono'" : billDesign.fontFamily === 'serif' ? "'Playfair Display'" : "'Inter'"}, sans-serif;
-              background: white; 
-              margin: 0; 
-              padding: 0;
-              color: var(--text);
-              font-size: ${billDesign.fontSize === 'sm' ? '10px' : billDesign.fontSize === 'lg' ? '14px' : '12px'};
-            }
-
-            .receipt { 
-              width: ${billDesign.paperWidth === 'narrow' ? '250px' : billDesign.paperWidth === 'wide' ? '400px' : '320px'}; 
-              margin: 0 auto; 
-              padding: 40px 20px;
-              background: var(--bg);
-              min-height: 100vh;
-            }
-
-            .header { 
-              text-align: ${billDesign.headerAlign}; 
-              margin-bottom: 30px;
-              padding-bottom: 20px;
-              border-bottom: ${billDesign.borderStyle === 'none' ? 'none' : `1px ${billDesign.borderStyle} var(--border)`};
-              position: relative;
-            }
-
-            ${billDesign.accentPosition === 'top' || billDesign.accentPosition === 'both' ? `
-            .header::before {
-              content: '';
-              position: absolute;
-              top: -40px;
-              left: 0;
-              right: 0;
-              height: ${billDesign.accentWidth}px;
-              background: var(--accent);
-            }
-            ` : ''}
-
-            .brand { 
-              font-size: 28px; 
-              font-weight: 900; 
-              letter-spacing: -1.5px; 
-              color: var(--accent);
-              text-transform: uppercase;
-              margin-bottom: 4px;
-            }
-
-            .tagline { 
-              font-size: 10px; 
-              text-transform: uppercase; 
-              font-weight: 900;
-              letter-spacing: 2px;
-              color: var(--muted);
-            }
-
-            .meta { 
-              display: flex; 
-              justify-content: space-between; 
-              font-size: 9px; 
-              font-weight: 700;
-              text-transform: uppercase;
-              color: var(--muted); 
-              margin-bottom: 30px;
-              letter-spacing: 1px;
-            }
-
-            .items { margin-bottom: 30px; }
-            .item { 
-              display: flex; 
-              justify-content: space-between; 
-              align-items: flex-start;
-              margin-bottom: 12px; 
-            }
-            .item-info { display: flex; flex-direction: column; }
-            .item-name { font-weight: 800; text-transform: uppercase; font-size: 11px; }
-            .item-qty { font-size: 9px; color: var(--muted); font-weight: 700; }
-
-            .totals { 
-              border-top: 1px dashed var(--border); 
-              padding-top: 20px; 
-              margin-bottom: 40px;
-            }
-            .total-row { 
-              display: flex; 
-              justify-content: space-between; 
-              margin-bottom: 6px;
-              font-weight: 700;
-              text-transform: uppercase;
-              font-size: 10px;
-            }
-            .grand-total { 
-              font-size: 20px; 
-              font-weight: 900; 
-              margin-top: 15px; 
-              color: var(--accent);
-              letter-spacing: -1px;
-            }
-
-            .footer { 
-              text-align: center; 
-              font-size: 9px; 
-              font-weight: 800;
-              text-transform: uppercase;
-              color: var(--muted);
-              letter-spacing: 1px;
-              line-height: 1.6;
-            }
-
-            @media print {
-              body { padding: 0; }
-              .receipt { width: 100%; min-height: auto; padding: 20px; }
-              @page { margin: 0; }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="receipt">
-            <div class="header">
-              <div class="brand">${settings.siteName}</div>
-              <div class="tagline">${billDesign.headerText}</div>
-            </div>
-            
-            <div class="meta">
-              <div>
-                ${billDesign.showOrderId ? `<div>ID: ${transactionId}</div>` : ''}
-                ${billDesign.showDate ? `<div>Date: ${date}</div>` : ''}
-              </div>
-              <div style="text-align: right">
-                ${billDesign.showTime ? `<div>Time: ${time}</div>` : ''}
-                ${billDesign.showPaymentMethod ? `<div>Paid: ${paymentMethod || 'Online'}</div>` : ''}
-              </div>
-            </div>
-
-            <div class="items">
-              ${items.map(item => `
-                <div class="item">
-                  <div class="item-info">
-                    <span class="item-name">${item.name}</span>
-                    <span class="item-qty">${item.quantity} x $${item.price.toFixed(2)}</span>
-                  </div>
-                  <span style="font-weight: 900">$${(item.price * item.quantity).toFixed(2)}</span>
-                </div>
-              `).join('')}
-            </div>
-
-            <div class="totals">
-              <div class="total-row"><span>Subtotal</span><span>$${subtotal.toFixed(2)}</span></div>
-              ${billDesign.showTax ? `<div class="total-row"><span>Tax (${settings.defaultTaxRate}%)</span><span>$${taxTotal.toFixed(2)}</span></div>` : ''}
-              ${billDesign.showDiscount && appliedCoupon ? `
-                <div class="total-row" style="color: #059669">
-                  <span>Discount (${appliedCoupon.code})</span>
-                  <span>-$${discountAmount.toFixed(2)}</span>
-                </div>
-              ` : ''}
-              <div class="total-row grand-total">
-                <span>TOTAL</span>
-                <span>$${total.toFixed(2)}</span>
-              </div>
-            </div>
-
-            <div class="footer">
-              ${billDesign.footerText}
-              <div style="margin-top: 20px; opacity: 0.1; font-size: 8px;">
-                ${transactionId} | AERO RESIN CORE | ONLINE
-              </div>
-            </div>
-          </div>
-          <script>
-            window.onload = () => {
-              setTimeout(() => {
-                window.print();
-                window.close();
-              }, 500);
-            }
-          </script>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
+    printReceipt(
+      {
+        id: transactionId,
+        items: items.map(i => ({
+          productId: i.productId,
+          name: i.name,
+          article: i.article,
+          price: i.price,
+          quantity: i.quantity,
+          tax: i.tax,
+          selectedVariant: i.selectedVariant,
+        })),
+        subtotal: getSubtotal(),
+        taxTotal: getTaxTotal(),
+        discount: discountAmount > 0 ? discountAmount : undefined,
+        couponCode: appliedCoupon?.code ?? undefined,
+        total: total,
+        paymentMethod: paymentMethod ?? 'Online Payment',
+        timestamp: new Date().toISOString(),
+        channel: 'online',
+        status: 'completed',
+        customerName: customerName || undefined,
+        customerPhone: customerPhone || undefined,
+      },
+      {
+        siteName: settings.siteName,
+        currency: settings.currency,
+        billDesign: settings.billDesign,
+      }
+    );
   };
 
   const handleSendToPhone = async () => {
@@ -433,37 +307,55 @@ export default function CartDrawer() {
                   >
                     {items.map((item) => (
                       <motion.div
-                        key={item.productId}
+                        key={`${item.productId}-${item.selectedVariant?.color || 'default'}-${item.selectedVariant?.size || 'default'}`}
                         layout
                         className="p-4 rounded-3xl bg-white/[0.03] border border-white/5 group"
                       >
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="min-w-0">
-                            <h4 className="text-xs font-black uppercase tracking-tight truncate">{item.name}</h4>
-                            <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest">{item.article}</p>
+                        <div className="flex gap-4 mb-3">
+                          <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center relative overflow-hidden shrink-0 shadow-inner">
+                            {item.image ? (
+                              <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="text-[10px] font-black text-white/10 uppercase tracking-tighter">Vault</div>
+                            )}
                           </div>
-                          <span className="text-sm font-black tracking-tight shrink-0 ml-3">
-                            {settings.formatPrice(item.price * item.quantity)}
-                          </span>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between">
+                              <div className="min-w-0">
+                                <h4 className="text-xs font-black uppercase tracking-tight truncate">{item.name}</h4>
+                                <div className="flex flex-col">
+                                  <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest">{item.article}</p>
+                                  {item.selectedVariant && (
+                                    <p className="text-[8px] font-black text-indigo-400/80 uppercase tracking-[0.2em] mt-0.5">
+                                      {item.selectedVariant.color} / {item.selectedVariant.size}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                              <span className="text-sm font-black tracking-tight shrink-0 ml-3">
+                                {settings.formatPrice(item.price * item.quantity)}
+                              </span>
+                            </div>
+                          </div>
                         </div>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-1 bg-black/40 rounded-xl p-1 border border-white/5">
                             <button
-                              onClick={() => updateQuantity(item.productId, -1)}
+                              onClick={() => updateQuantity(item.productId, -1, item.selectedVariant)}
                               className="w-7 h-7 flex items-center justify-center hover:bg-white/10 rounded-lg transition-colors text-white/60"
                             >
                               <Minus size={12} />
                             </button>
                             <span className="text-xs font-black w-6 text-center">{item.quantity}</span>
                             <button
-                              onClick={() => updateQuantity(item.productId, 1)}
+                              onClick={() => updateQuantity(item.productId, 1, item.selectedVariant)}
                               className="w-7 h-7 flex items-center justify-center hover:bg-white/10 rounded-lg transition-colors text-white/60"
                             >
                               <Plus size={12} />
                             </button>
                           </div>
                           <button
-                            onClick={() => removeItem(item.productId)}
+                            onClick={() => removeItem(item.productId, item.selectedVariant)}
                             className="w-8 h-8 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all shadow-inner"
                           >
                             <Trash2 size={14} />
@@ -507,6 +399,26 @@ export default function CartDrawer() {
                               placeholder="Phone or Email"
                               value={customerPhone}
                               onChange={(e) => setCustomerPhone(e.target.value)}
+                              className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-6 text-xs font-bold outline-none focus:border-indigo-500/30 transition-all"
+                            />
+                         </div>
+                         <div className="relative group">
+                            <Ticket size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-indigo-400 transition-colors" />
+                            <input 
+                              type="text" 
+                              placeholder="Full Delivery Address"
+                              value={deliveryAddress}
+                              onChange={(e) => setDeliveryAddress(e.target.value)}
+                              className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-6 text-xs font-bold outline-none focus:border-indigo-500/30 transition-all"
+                            />
+                         </div>
+                         <div className="relative group">
+                            <BadgeCheck size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-indigo-400 transition-colors" />
+                            <input 
+                              type="text" 
+                              placeholder="City"
+                              value={deliveryCity}
+                              onChange={(e) => setDeliveryCity(e.target.value)}
                               className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-6 text-xs font-bold outline-none focus:border-indigo-500/30 transition-all"
                             />
                          </div>
@@ -592,22 +504,21 @@ export default function CartDrawer() {
                              <div className="flex justify-between items-start">
                                 <div>
                                    <p className="text-[8px] font-black text-black/30 uppercase mb-1">Transaction</p>
-                                   <p className="text-[10px] font-black tracking-tight">{transactionId}</p>
+                                   <p className="text-[10px] font-black tracking-tight">{completedOrder?.id}</p>
                                 </div>
                                 <div className="text-right">
                                    <p className="text-[8px] font-black text-black/30 uppercase mb-1">Channel</p>
                                    <p className="text-[10px] font-black text-indigo-600 uppercase">E-Commerce</p>
                                 </div>
                              </div>
-
                              <div className="space-y-4">
-                                {items.map(item => (
-                                  <div key={item.productId} className="flex justify-between items-center gap-4 text-black">
+                                {(completedOrder?.items || []).map((item, idx) => (
+                                  <div key={idx} className="flex justify-between items-center gap-4 text-black">
                                      <div className="flex flex-col min-w-0">
                                         <span className="text-xs font-black truncate">{item.name}</span>
-                                        <span className="text-[10px] text-black/40">{item.quantity} x ${item.price.toFixed(2)}</span>
+                                        <span className="text-[10px] text-black/40">{item.quantity} x {settings.formatPrice(item.price)}</span>
                                      </div>
-                                     <span className="text-xs font-black shrink-0">${(item.price * item.quantity).toFixed(2)}</span>
+                                     <span className="text-xs font-black shrink-0">{settings.formatPrice(item.price * item.quantity)}</span>
                                   </div>
                                 ))}
                              </div>
@@ -615,21 +526,21 @@ export default function CartDrawer() {
                              <div className="pt-6 border-t border-dashed border-black/20 space-y-2 text-black">
                                 <div className="flex justify-between text-xs font-bold text-black/40 uppercase">
                                    <span>Subtotal</span>
-                                   <span className="text-black">{settings.formatPrice(subtotal)}</span>
+                                   <span className="text-black">{settings.formatPrice(completedOrder?.subtotal || 0)}</span>
                                 </div>
-                                {appliedCoupon && (
+                                {completedOrder?.discount ? (
                                   <div className="flex justify-between text-xs font-bold text-emerald-600 uppercase">
-                                     <span>Discount ({appliedCoupon.code})</span>
-                                     <span>-{settings.formatPrice(discountAmount)}</span>
+                                     <span>Discount ({completedOrder.appliedCoupon?.code})</span>
+                                     <span>-{settings.formatPrice(completedOrder.discount)}</span>
                                   </div>
-                                )}
+                                ) : null}
                                 <div className="flex justify-between text-xs font-bold text-black/40 uppercase">
                                    <span>Security Tax</span>
-                                   <span className="text-black">{settings.formatPrice(taxTotal)}</span>
+                                   <span className="text-black">{settings.formatPrice(completedOrder?.taxTotal || 0)}</span>
                                 </div>
                                 <div className="flex justify-between text-xl font-black pt-4">
                                    <span className="tracking-tighter uppercase">Total</span>
-                                   <span className="text-indigo-600" style={{ color: settings.billDesign.accentColor }}>{settings.formatPrice(total)}</span>
+                                   <span className="text-indigo-600" style={{ color: settings.billDesign.accentColor }}>{settings.formatPrice(completedOrder?.total || 0)}</span>
                                 </div>
                              </div>
                           </div>

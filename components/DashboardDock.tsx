@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, useMotionValue, useSpring, useTransform, MotionValue, AnimatePresence } from 'framer-motion';
-import { LayoutGrid, Package, Ticket, ShoppingCart, BarChart3, Settings, ArrowLeft, BookOpen, Wallet, Handshake, Layers } from 'lucide-react';
+import { LayoutGrid, ShoppingCart, BarChart3, ArrowLeft, Wallet, Layers, Package, Settings as SettingsIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 import { useDashboardStore, DashboardTab } from '@/store/dashboardStore';
@@ -10,10 +10,10 @@ import { useAuthStore } from '@/store/authStore';
 
 const DOCK_ITEMS: { icon: React.ReactNode; label: DashboardTab }[] = [
   { icon: <LayoutGrid size={20} />, label: "Hub" },
-  { icon: <BarChart3 size={20} />, label: "Stats" },
   { icon: <ShoppingCart size={20} />, label: "PoS" },
+  { icon: <BarChart3 size={20} />, label: "Stats" },
   { icon: <Wallet size={20} />, label: "Khorochkhata" },
-  { icon: <Layers size={21} />, label: "Management" },
+  { icon: <Layers size={20} />, label: "Management" },
 ];
 
 function DockIcon({ children, label, active, onClick, mouseX, isCompact, isMobile }: { 
@@ -51,8 +51,8 @@ function DockIcon({ children, label, active, onClick, mouseX, isCompact, isMobil
       className={cn(
         "aspect-square rounded-[1rem] md:rounded-[1.25rem] backdrop-blur-3xl border transition-colors duration-500 flex items-center justify-center cursor-pointer relative group",
         active 
-          ? "bg-indigo-500/25 border-indigo-400/50 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-indigo-200" 
-          : "bg-white/10 border-white/15 text-white/70 hover:text-white shadow-resin"
+          ? "bg-[var(--accent)]/25 border-[var(--accent)]/50 shadow-[0_0_20px_var(--accent-glow)] text-[var(--accent)]" 
+          : "bg-[var(--card-bg)] border-[var(--card-border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] shadow-sm"
       )}
     >
       <motion.div style={{ scale }} className="relative z-10 flex items-center justify-center">
@@ -62,18 +62,18 @@ function DockIcon({ children, label, active, onClick, mouseX, isCompact, isMobil
       {active && (
         <motion.div 
           layoutId="dock-glow"
-          className="absolute inset-0 rounded-[1rem] md:rounded-[1.25rem] bg-indigo-500/10 blur-sm -z-10"
+          className="absolute inset-0 rounded-[1rem] md:rounded-[1.25rem] bg-[var(--accent)]/10 blur-sm -z-10"
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
         />
       )}
 
-      <div className="absolute inset-0 rounded-[1rem] md:rounded-[1.25rem] bg-gradient-to-br from-white/20 to-transparent pointer-events-none opacity-40 group-hover:opacity-60 transition-opacity" />
-      <div className="absolute inset-px rounded-[0.9rem] md:rounded-[1.15rem] border border-white/10 pointer-events-none" />
+      <div className="absolute inset-0 rounded-[1rem] md:rounded-[1.25rem] bg-gradient-to-br from-[var(--text-primary)]/10 to-transparent pointer-events-none opacity-20 group-hover:opacity-30 transition-opacity" />
+      <div className="absolute inset-px rounded-[0.9rem] md:rounded-[1.15rem] border border-[var(--text-primary)]/5 pointer-events-none" />
       
       {!isMobile && (
-        <div className="absolute -top-14 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-black/90 backdrop-blur-2xl border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] text-white opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap translate-y-2 group-hover:translate-y-0 shadow-2xl">
+        <div className="absolute -top-14 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-[var(--foreground)] backdrop-blur-2xl border border-[var(--card-border)] rounded-xl text-[10px] font-black uppercase tracking-[0.15em] text-[var(--background)] opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap translate-y-2 group-hover:translate-y-0 shadow-2xl">
           {label}
-          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-black/90 border-r border-b border-white/10 rotate-45" />
+          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[var(--foreground)] border-r border-b border-[var(--card-border)] rotate-45" />
         </div>
       )}
     </motion.div>
@@ -139,7 +139,7 @@ export default function DashboardDock() {
         }}
         transition={{ type: "spring", stiffness: 200, damping: 25 }}
         style={{ pointerEvents: isInputFocused ? 'none' : 'auto' }}
-        className="bg-black/40 backdrop-blur-[40px] border border-white/10 shadow-[0_30px_60px_rgba(0,0,0,0.8),inset_0_1px_2px_rgba(255,255,255,0.1)] flex flex-col items-center w-max pointer-events-auto"
+        className="bg-[var(--glass-bg)] backdrop-blur-[40px] border border-[var(--card-border)] shadow-resin flex flex-col items-center w-max pointer-events-auto"
       >
       <div 
         onMouseMove={(e) => mouseX.set(e.pageX)}
@@ -183,7 +183,7 @@ export default function DashboardDock() {
                   mouseX={mouseX}
                   isMobile={isMobile}
                 >
-                  {React.cloneElement(item.icon as any, { 
+                  {React.cloneElement(item.icon as React.ReactElement<{ size: number }>, { 
                     size: isMobile ? 24 : 20 
                   })}
                 </DockIcon>
@@ -194,7 +194,7 @@ export default function DashboardDock() {
       </div>
       
       {!isPosMode && (
-        <div className="absolute -bottom-1 left-1/4 right-1/4 h-px bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent blur-sm" />
+        <div className="absolute -bottom-1 left-1/4 right-1/4 h-px bg-gradient-to-r from-transparent via-[var(--accent)]/50 to-transparent blur-sm" />
       )}
       </motion.div>
     </div>

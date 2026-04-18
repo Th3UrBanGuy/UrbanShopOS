@@ -10,9 +10,7 @@ import {
   ShieldCheck, 
   Truck, 
   RefreshCcw, 
-  ChevronRight,
   Check,
-  Package,
   CircleDot
 } from 'lucide-react';
 import { useInventoryStore } from '@/store/inventoryStore';
@@ -24,9 +22,30 @@ import { cn } from '@/lib/utils';
 export default function ProductDetailPage() {
   const { id } = useParams();
   const router = useRouter();
-  const products = useInventoryStore((s) => s.products);
+  const { products, getAvailableStock, addHold, removeHold, cleanupHolds } = useInventoryStore();
   const addItem = useCartStore((s) => s.addItem);
+  const removeItem = useCartStore((s) => s.removeItem);
   const toggleCart = useCartStore((s) => s.toggleOpen);
+
+  const sessionId = React.useMemo(() => {
+    if (typeof window === 'undefined') return 'store-ssr';
+    let id = localStorage.getItem('aero-session-id');
+    if (!id) {
+      id = `store-${Math.random().toString(36).substr(2, 9)}`;
+      localStorage.setItem('aero-session-id', id);
+    }
+    return id;
+  }, []);
+
+  // Cleanup effect
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      products.forEach(p => {
+        if (p.holds && p.holds.length > 0) cleanupHolds(p.id);
+      });
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [products, cleanupHolds]);
 
   const product = products.find((p) => p.id === Number(id));
 
@@ -56,8 +75,17 @@ export default function ProductDetailPage() {
       article: product.article,
       price: product.price + (selectedSize?.priceAdjustment || 0),
       tax: product.tax,
+      image: selectedVariant?.image || product.image,
+      selectedVariant: selectedVariant ? {
+        color: selectedVariant.color,
+        size: selectedSize?.size || ''
+      } : undefined
     });
     
+    // Add stock hold
+    if (selectedVariant && selectedSize) {
+      addHold(product.id, selectedVariant.color, selectedSize.size, 1, sessionId);
+    }
     setIsAdded(true);
     setTimeout(() => {
       setIsAdded(false);
@@ -90,20 +118,38 @@ export default function ProductDetailPage() {
              >
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-purple-500/10 opacity-50" />
                 
-                {/* Product Abstract Representation */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                   <motion.div 
-                     animate={{ 
-                       rotate: 360,
-                       scale: [1, 1.1, 1]
-                     }}
-                     transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                     className="w-64 h-64 rounded-full bg-indigo-500/5 blur-[100px]"
-                   />
-                   <div className="relative text-[120px] font-black text-white/[0.03] select-none group-hover:text-white/[0.06] transition-colors tracking-tighter">
-                      {product.article.split('-')[0]}
-                   </div>
-                </div>
+                {/* Product Asset Representation */}
+                 <div className="absolute inset-0 flex items-center justify-center">
+                    <motion.div 
+                      key={selectedVariant?.color || 'default'}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.5 }}
+                      className="w-full h-full flex items-center justify-center p-12"
+                    >
+                       {(selectedVariant?.image || product.image) ? (
+                         <img 
+                           src={selectedVariant?.image || product.image} 
+                           alt={product.name} 
+                           className="w-full h-full object-contain drop-shadow-[0_20px_50px_rgba(255,255,255,0.1)] transition-transform duration-700 group-hover:scale-110" 
+                         />
+                       ) : (
+                         <div className="relative">
+                            <motion.div 
+                              animate={{ 
+                                rotate: 360,
+                                scale: [1, 1.1, 1]
+                              }}
+                              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                              className="w-64 h-64 rounded-full bg-indigo-500/5 blur-[100px] absolute -inset-32"
+                            />
+                            <div className="relative text-[120px] font-black text-white/[0.03] select-none group-hover:text-white/[0.06] transition-colors tracking-tighter">
+                               {product.article.split('-')[0]}
+                            </div>
+                         </div>
+                       )}
+                    </motion.div>
+                 </div>
 
                 {/* Floating Tags */}
                 <div className="absolute top-8 left-8 flex flex-col gap-2">
@@ -185,20 +231,39 @@ export default function ProductDetailPage() {
                        <div>
                           <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-4">Selection Specification</p>
                           <div className="flex flex-wrap gap-3">
-                             {selectedVariant.sizes.map((s, i) => (
-                               <button
-                                 key={i}
-                                 onClick={() => setSelectedSize(s)}
-                                 className={cn(
-                                   "px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border",
-                                   selectedSize?.size === s.size 
-                                     ? "bg-indigo-600 text-white border-indigo-500 shadow-resin" 
-                                     : "bg-white/5 text-white/40 border-white/5 hover:border-white/20"
-                                 )}
-                               >
-                                 {s.size}
-                               </button>
-                             ))}
+                              {selectedVariant.sizes.map((s, i) => {
+                                  const available = getAvailableStock(product.id, selectedVariant.color, s.size);
+                                  const totalStockInSize = s.stock;
+                                  const isSoldOut = totalStockInSize <= 0;
+                                  const isReserved = totalStockInSize > 0 && available <= 0;
+
+                                  return (
+                                    <button
+                                      key={i}
+                                      disabled={available <= 0}
+                                      onClick={() => setSelectedSize(s)}
+                                      className={cn(
+                                        "px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border relative overflow-hidden group/size",
+                                        available <= 0 
+                                          ? "bg-white/[0.02] text-white/10 border-white/5 cursor-not-allowed" 
+                                          : selectedSize?.size === s.size 
+                                            ? "bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)]" 
+                                            : "bg-white/5 text-white/40 border-white/5 hover:border-white/20 hover:bg-white/[0.08]"
+                                      )}
+                                    >
+                                      <div className="flex flex-col items-center gap-1 relative z-10">
+                                        <span>{s.size}</span>
+                                        {isSoldOut ? (
+                                          <span className="text-[6px] text-rose-500/50">SOLD OUT</span>
+                                        ) : isReserved ? (
+                                          <span className="text-[6px] text-amber-500/50 animate-pulse">RESERVED</span>
+                                        ) : (
+                                          <span className="text-[6px] opacity-20 group-hover/size:opacity-50">{available} PAIRS</span>
+                                        )}
+                                      </div>
+                                    </button>
+                                  );
+                              })}
                           </div>
                        </div>
                      )}
@@ -206,12 +271,22 @@ export default function ProductDetailPage() {
                 )}
 
                 <div className="flex flex-col sm:flex-row gap-4 mb-16 pt-8 border-t border-white/5">
-                   <LiquidButton 
-                     onClick={handleAddToBag}
-                     className="flex-1 py-5 text-sm font-black uppercase tracking-[0.3em] bg-white text-black border-white shadow-[0_20px_40px_rgba(255,255,255,0.1)] relative overflow-hidden"
-                   >
-                     <AnimatePresence mode="wait">
-                       {isAdded ? (
+                    <LiquidButton 
+                      onClick={handleAddToBag}
+                      disabled={!selectedSize || getAvailableStock(product.id, selectedVariant?.color || '', selectedSize.size) <= 0}
+                      className={cn(
+                        "flex-1 py-5 text-sm font-black uppercase tracking-[0.3em] relative overflow-hidden transition-all",
+                        (!selectedSize || getAvailableStock(product.id, selectedVariant?.color || '', selectedSize.size) <= 0)
+                          ? "bg-white/5 text-white/10 border-white/5 cursor-not-allowed"
+                          : "bg-white text-black border-white shadow-[0_20px_40px_rgba(255,255,255,0.1)]"
+                      )}
+                    >
+                      <AnimatePresence mode="wait">
+                        {(!selectedSize || getAvailableStock(product.id, selectedVariant?.color || '', selectedSize.size) <= 0) ? (
+                          <motion.div key="soldout" initial={{ y: 20 }} animate={{ y: 0 }} className="flex items-center justify-center gap-2">
+                            Out of Stock
+                          </motion.div>
+                        ) : isAdded ? (
                          <motion.div 
                            key="check"
                            initial={{ y: 20 }}

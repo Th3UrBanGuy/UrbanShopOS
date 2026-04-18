@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc, updateDoc, deleteDoc, getDocs, collection, query, where } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, deleteDoc, getDocs, collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db, collections } from '../firebase';
 import { InventoryProduct } from '@/store/inventoryStore';
 
@@ -11,6 +11,19 @@ export const inventoryService = {
       products.push(d.data() as InventoryProduct);
     });
     return products;
+  },
+
+  subscribeToProducts(callback: (products: InventoryProduct[]) => void) {
+    const q = query(collection(db, collections.INVENTORY));
+    return onSnapshot(q, (snapshot) => {
+      const products: InventoryProduct[] = [];
+      snapshot.forEach((d) => {
+        products.push(d.data() as InventoryProduct);
+      });
+      callback(products);
+    }, (error) => {
+      console.error("Inventory subscription error:", error);
+    });
   },
 
   async getById(id: number): Promise<InventoryProduct | null> {

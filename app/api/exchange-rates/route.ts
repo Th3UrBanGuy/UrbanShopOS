@@ -16,8 +16,8 @@ export async function GET() {
     
     // data.rates contains the exchange rates relative to USD base
     return NextResponse.json({ success: true, rates: data.rates, base: data.base });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Exchange Rates Error:', error);
-    return NextResponse.json({ error: error.message || 'Failed to fetch rates' }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Failed to fetch rates' }, { status: 500 });
   }
 }

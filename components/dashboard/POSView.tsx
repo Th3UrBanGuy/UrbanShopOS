@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, Wallet, Smartphone, CheckCircle2, X, Printer, Settings2, ReceiptText, ArrowRight, Sparkles, Phone } from 'lucide-react';
+import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, Wallet, Smartphone, X, Printer, Settings2, ReceiptText, ArrowRight, Phone } from 'lucide-react';
 import ResinCard from '@/components/ResinCard';
 import LiquidButton from '@/components/LiquidButton';
 import { cn } from '@/lib/utils';
@@ -18,6 +18,7 @@ import { Ticket, BadgeCheck, BadgeAlert } from 'lucide-react';
 
 interface CartItem extends InventoryProduct {
   quantity: number;
+  image?: string;
   selectedVariant?: {
     color: string;
     size: string;
@@ -25,9 +26,25 @@ interface CartItem extends InventoryProduct {
 }
 
 export default function POSView() {
-  const { products, decrementStock, decrementVariantStock } = useInventoryStore();
+  const { products, decrementStock, decrementVariantStock, addHold, removeHold, cleanupHolds, getAvailableStock, sessionId, initialize: initInventory } = useInventoryStore();
   const settings = useSettingsStore();
   const addTransaction = useSalesStore((s) => s.addTransaction);
+  
+  // Initialization
+  React.useEffect(() => {
+    initInventory();
+  }, [initInventory]);
+
+  // Reservation cleanup loop
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      products.forEach(p => {
+        if (p.holds && p.holds.length > 0) cleanupHolds(p.id);
+      });
+    }, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, [products, cleanupHolds]);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [cart, setCart] = useState<CartItem[]>([]);
   const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
@@ -53,11 +70,35 @@ export default function POSView() {
   const billRef = useRef<HTMLDivElement>(null);
 
   const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    p.article.toLowerCase().includes(searchQuery.toLowerCase())
+    (p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+     p.article.toLowerCase().includes(searchQuery.toLowerCase())) &&
+    p.stock > 0
   );
 
   const addToCart = (product: InventoryProduct, variant?: { color: string; size: string }) => {
+    // Find price adjustment if variant is selected
+    let priceAdjustment = 0;
+    if (variant && product.variants) {
+      const v = product.variants.find(v => v.color === variant.color);
+      const s = v?.sizes.find(sz => sz.size === variant.size);
+      priceAdjustment = s?.priceAdjustment || 0;
+    }
+
+    const available = getAvailableStock(product.id, variant?.color || '', variant?.size || '');
+    if (available <= 0) {
+      useToastStore.getState().addToast('No more pairs available in this size', 'error');
+      return;
+    }
+
+    const finalPrice = product.price + priceAdjustment;
+    
+    // Find variant image
+    let variantImage = product.image;
+    if (variant && product.variants) {
+      const v = product.variants.find(v => v.color === variant.color);
+      if (v?.image) variantImage = v.image;
+    }
+
     setCart(prev => {
       const existing = prev.find(item => 
         item.id === product.id && 
@@ -73,9 +114,23 @@ export default function POSView() {
             : item
         );
       }
-      return [...prev, { ...product, quantity: 1, selectedVariant: variant }];
+      return [...prev, { ...product, image: variantImage, price: finalPrice, quantity: 1, selectedVariant: variant }];
     });
+
+    // Create reservation
+    addHold(product.id, variant?.color || '', variant?.size || '', 1, sessionId);
+    
     setPickingVariantFor(null);
+  };
+
+  const removeFromCart = (id: number, variant?: { color: string; size: string }) => {
+    setCart(prev => prev.filter(item => 
+      !(item.id === id && 
+        item.selectedVariant?.color === variant?.color && 
+        item.selectedVariant?.size === variant?.size)
+    ));
+    removeHold(id, variant?.color || '', variant?.size || '', sessionId);
+    if (expandedItemId === id) setExpandedItemId(null);
   };
 
   const handleProductClick = (product: InventoryProduct) => {
@@ -86,15 +141,16 @@ export default function POSView() {
     }
   };
 
-  const removeFromCart = (id: number) => {
-    setCart(prev => prev.filter(item => item.id !== id));
-    if (expandedItemId === id) setExpandedItemId(null);
-  };
-
-  const updateQuantity = (id: number, delta: number) => {
+  const updateQuantity = (id: number, delta: number, variant?: { color: string; size: string }) => {
     setCart(prev => prev.map(item => {
-      if (item.id === id) {
+      if (item.id === id && 
+          item.selectedVariant?.color === variant?.color && 
+          item.selectedVariant?.size === variant?.size) {
         const newQty = Math.max(1, item.quantity + delta);
+        
+        // Sync hold (adjust quantity by delta)
+        addHold(id, variant?.color || '', variant?.size || '', delta, sessionId);
+        
         return { ...item, quantity: newQty };
       }
       return item;
@@ -141,6 +197,7 @@ export default function POSView() {
           price: item.price,
           quantity: item.quantity,
           tax: item.tax,
+          selectedVariant: item.selectedVariant
         })),
         subtotal,
         taxTotal: totalTax,
@@ -156,7 +213,7 @@ export default function POSView() {
       // Decrement inventory stock
       cart.forEach((item) => {
         if (item.selectedVariant) {
-          decrementVariantStock(item.id, item.selectedVariant.color, item.selectedVariant.size, item.quantity);
+          decrementVariantStock(item.id, item.selectedVariant.color, item.selectedVariant.size, item.quantity, sessionId);
         } else {
           decrementStock(item.id, item.quantity);
         }
@@ -181,6 +238,7 @@ export default function POSView() {
           price: item.price,
           quantity: item.quantity,
           tax: item.tax,
+          selectedVariant: item.selectedVariant
         })),
         subtotal,
         taxTotal: totalTax,
@@ -248,12 +306,12 @@ export default function POSView() {
     <div className="h-full flex flex-col gap-4 overflow-hidden relative">
       
       {/* Mobile Tab Switcher */}
-      <div className="lg:hidden flex bg-white/5 p-1 rounded-2xl border border-white/5 shrink-0">
+      <div className="lg:hidden flex bg-[var(--card-bg)] p-1 rounded-2xl border border-[var(--card-border)] shrink-0">
         <button 
           onClick={() => setMobileTab('products')}
           className={cn(
             "flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
-            mobileTab === 'products' ? "bg-white text-black shadow-resin" : "text-white/40"
+            mobileTab === 'products' ? "bg-[var(--text-primary)] text-[var(--background)] shadow-resin" : "text-[var(--text-muted)]"
           )}
         >
           Products
@@ -262,7 +320,7 @@ export default function POSView() {
           onClick={() => setMobileTab('cart')}
           className={cn(
             "flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2",
-            mobileTab === 'cart' ? "bg-white text-black shadow-resin" : "text-white/40"
+            mobileTab === 'cart' ? "bg-[var(--text-primary)] text-[var(--background)] shadow-resin" : "text-[var(--text-muted)]"
           )}
         >
           Cart ({cart.length})
@@ -278,27 +336,27 @@ export default function POSView() {
         )}>
           <div className="flex items-center justify-between shrink-0">
              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-pink-500/20 border border-pink-500/30 flex items-center justify-center text-pink-400 shadow-resin">
+                <div className="w-9 h-9 rounded-lg bg-[var(--accent)]/20 border border-[var(--accent)]/30 flex items-center justify-center text-[var(--accent)] shadow-resin">
                   <ShoppingCart size={18} />
                 </div>
-                <h2 className="text-base sm:text-lg font-black tracking-tight uppercase truncate">Point of Sale <span className="hidden sm:inline text-white/20 ml-2">PoS Terminal</span></h2>
+                <h2 className="text-base sm:text-lg font-black tracking-tight uppercase truncate text-[var(--text-primary)]">Point of Sale <span className="hidden sm:inline text-[var(--text-muted)] ml-2">PoS Terminal</span></h2>
              </div>
              <button 
                onClick={() => setShowSettings(true)}
-               className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-colors"
+               className="w-9 h-9 rounded-lg bg-[var(--card-bg)] border border-[var(--card-border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
              >
                 <Settings2 size={18} />
              </button>
           </div>
 
           <div className="relative shrink-0 px-1">
-            <Search size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20" />
+            <Search size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
             <input 
               type="text" 
               placeholder="Search products..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-[2rem] py-4 pl-14 pr-6 text-sm font-bold outline-none focus:bg-white/10 focus:border-pink-500/30 transition-all shadow-resin"
+              className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-[2rem] py-4 pl-14 pr-6 text-sm font-bold outline-none focus:bg-[var(--card-bg)] focus:border-[var(--accent)]/30 transition-all shadow-resin"
             />
           </div>
 
@@ -309,19 +367,30 @@ export default function POSView() {
                     key={p.id} 
                     onClick={() => handleProductClick(p)}
                     className="p-3 sm:p-4 group h-full flex flex-col justify-between"
-                    glowingColor="rgba(236,72,153,0.1)"
+                    glowingColor="rgba(30,58,138,0.1)"
                   >
-                    <div className="aspect-square rounded-xl bg-white/5 border border-white/5 mb-3 flex items-center justify-center relative overflow-hidden shrink-0">
-                       <span className="text-[10px] font-black text-white/10 uppercase tracking-tighter select-none">{p.article}</span>
-                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-pink-500/10 backdrop-blur-sm">
-                          <Plus className="text-pink-400" size={32} />
+                    <div className="aspect-square rounded-xl bg-[var(--background)] border border-[var(--card-border)] mb-3 flex items-center justify-center relative overflow-hidden shrink-0 group-hover:shadow-[0_0_30px_var(--accent-glow)] transition-all duration-500">
+                      {p.image ? (
+                        <motion.img 
+                          whileHover={{ scale: 1.1 }}
+                          src={p.image} 
+                          alt={p.name} 
+                          className="w-full h-full object-cover transition-transform duration-700"
+                        />
+                      ) : (
+                        <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-tighter select-none">{p.article.split('-')[0]}</span>
+                      )}
+                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-[var(--accent)]/10 backdrop-blur-[2px]">
+                          <div className="w-10 h-10 rounded-full bg-[var(--accent)] text-white flex items-center justify-center shadow-[0_0_20px_var(--accent-glow)] scale-50 group-hover:scale-100 transition-transform duration-300">
+                             <Plus size={24} strokeWidth={3} />
+                          </div>
                        </div>
                     </div>
                     <div>
-                      <h4 className="text-[10px] sm:text-xs font-bold truncate mb-1">{p.name}</h4>
+                      <h4 className="text-[10px] sm:text-xs font-bold truncate mb-1 text-[var(--text-primary)]">{p.name}</h4>
                       <div className="flex justify-between items-center">
-                         <span className="text-xs sm:text-sm font-black tracking-tighter">${p.price}</span>
-                         <span className={cn("text-[8px] font-bold px-1.5 py-0.5 rounded uppercase", p.stock < 20 ? "bg-rose-500/20 text-rose-400" : "bg-white/5 text-white/30")}>
+                         <span className="text-xs sm:text-sm font-black tracking-tighter text-[var(--text-primary)]">${p.price}</span>
+                         <span className={cn("text-[8px] font-bold px-1.5 py-0.5 rounded uppercase", p.stock < 20 ? "bg-rose-500/20 text-rose-400" : "bg-[var(--card-bg)] text-[var(--text-muted)]")}>
                            {p.stock}
                          </span>
                       </div>
@@ -338,21 +407,21 @@ export default function POSView() {
           mobileTab === 'products' ? "hidden lg:flex" : "flex"
         )}>
           {/* Cart Card */}
-          <ResinCard className="flex-1 flex flex-col overflow-hidden min-h-0" glowingColor="rgba(236,72,153,0.05)">
-             <div className="p-4 sm:p-6 border-b border-white/5 flex items-center justify-between shrink-0">
-                <h3 className="text-xs sm:text-sm font-black uppercase tracking-widest text-white/50 flex items-center gap-2">
+          <ResinCard className="flex-1 flex flex-col overflow-hidden min-h-0" glowingColor="var(--accent-glow)">
+             <div className="p-4 sm:p-6 border-b border-[var(--card-border)] flex items-center justify-between shrink-0">
+                <h3 className="text-xs sm:text-sm font-black uppercase tracking-widest text-[var(--text-muted)] flex items-center gap-2">
                   <ReceiptText size={16} /> Your Cart
                 </h3>
-                <span className="px-2 py-0.5 rounded-full bg-white/5 text-[10px] font-black text-white/40">{cart.length}</span>
+                <span className="px-2 py-0.5 rounded-full bg-[var(--card-bg)] text-[10px] font-black text-[var(--text-muted)]">{cart.length}</span>
              </div>
 
-             <div className="flex-1 overflow-y-auto p-3 sm:p-4 grid grid-cols-3 gap-2 no-scrollbar min-h-0 bg-black/10 content-start">
+             <div className="flex-1 overflow-y-auto p-3 sm:p-4 grid grid-cols-3 gap-2 no-scrollbar min-h-0 bg-[var(--glass-bg)] content-start">
                 <AnimatePresence mode="popLayout">
                   {cart.map((item) => {
                     const isExpanded = expandedItemId === item.id;
                     return (
                       <motion.div
-                        key={item.id}
+                        key={`${item.id}-${item.selectedVariant?.color || 'default'}-${item.selectedVariant?.size || 'default'}`}
                         layout
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -360,65 +429,74 @@ export default function POSView() {
                         className={cn(
                           "rounded-xl border transition-all duration-500 overflow-hidden cursor-pointer relative",
                           isExpanded 
-                            ? "col-span-3 bg-white/10 border-white/20 shadow-resin p-4" 
-                            : "col-span-1 bg-white/5 border-white/5 hover:border-white/10 p-2 aspect-square flex flex-col items-center justify-center"
+                            ? "col-span-3 bg-[var(--card-bg)] border-[var(--card-border)] shadow-resin p-4" 
+                            : "col-span-1 bg-[var(--card-bg)] border-[var(--card-border)] hover:border-[var(--text-muted)] p-2 aspect-square flex flex-col items-center justify-center"
                         )}
                         onClick={() => setExpandedItemId(isExpanded ? null : item.id)}
                       >
                         {!isExpanded ? (
                           <>
-                            <div className="text-[10px] font-black text-white/20 mb-1 uppercase truncate w-full text-center px-1">
-                              {item.name.split(' ')[0]}
+                            <div className="w-12 h-12 rounded-lg bg-[var(--input-bg)] border border-[var(--card-border)] flex items-center justify-center relative overflow-hidden mb-1 shadow-inner">
+                              {item.image ? (
+                                <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <span className="text-[10px] font-black text-[var(--accent)]">{item.quantity}</span>
+                              )}
+                              <div className="absolute top-0 right-0 px-1 bg-[var(--accent)] text-[var(--background)] text-[8px] font-black rounded-bl-lg">
+                                {item.quantity}
+                              </div>
                             </div>
-                            <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-xs font-black text-pink-400 shadow-inner">
-                              {item.quantity}
+                            <div className="text-[8px] font-black text-[var(--text-muted)] uppercase truncate w-full text-center px-1">
+                              {item.name}
                             </div>
-                            <div className="absolute top-1.5 right-1.5 w-1 h-1 rounded-full bg-pink-500/40" />
                           </>
                         ) : (
                           <>
                             <div className="flex items-center justify-between w-full gap-4">
                               <div className="flex items-center gap-3 min-w-0">
-                                <div className="w-10 h-10 rounded-xl bg-pink-500/20 border border-pink-500/30 flex items-center justify-center text-pink-400 shadow-resin shrink-0">
-                                  <span className="text-[10px] font-black uppercase">{item.article.split('-')[0]}</span>
+                                <div className="w-12 h-12 rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] flex items-center justify-center relative overflow-hidden shrink-0 shadow-resin">
+                                  {item.image ? (
+                                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                  ) : (
+                                    <span className="text-[10px] font-black uppercase text-[var(--accent)]">{item.article.split('-')[0]}</span>
+                                  )}
                                 </div>
                                 <div className="min-w-0">
-                                  <h4 className="text-xs font-bold text-white truncate">{item.name}</h4>
+                                  <h4 className="text-xs font-bold text-[var(--text-primary)] truncate">{item.name}</h4>
                                   {item.selectedVariant && (
-                                    <p className="text-[9px] font-black text-pink-400/80 uppercase tracking-widest">
+                                    <p className="text-[9px] font-black text-[var(--accent)]/80 uppercase tracking-widest">
                                       {item.selectedVariant.color} / {item.selectedVariant.size}
                                     </p>
                                   )}
-                                  <p className="text-[10px] font-black text-white/30 tracking-widest">{settings.formatPrice(item.price)} / unit</p>
+                                  <p className="text-[10px] font-black text-[var(--text-muted)] tracking-widest">{settings.formatPrice(item.price)} / unit</p>
                                 </div>
                               </div>
                               <div className="text-right shrink-0">
-                                 <span className="text-sm font-black tracking-tight shrink-0 ml-3">
+                                 <span className="text-sm font-black tracking-tight shrink-0 ml-3 text-[var(--text-primary)]">
                             {settings.formatPrice(item.price * item.quantity)}
                           </span>
-                                 <span className="text-[8px] font-bold text-white/20 uppercase">Total Line</span>
+                                 <span className="text-[8px] font-bold text-[var(--text-muted)] uppercase">Total Line</span>
                               </div>
                             </div>
-
-                            <div className="pt-4 mt-4 border-t border-white/5 flex items-center justify-between w-full">
-                               <div className="flex items-center gap-2 bg-black/40 rounded-xl p-1 border border-white/5">
+                             <div className="pt-4 mt-4 border-t border-[var(--card-border)] flex items-center justify-between w-full">
+                               <div className="flex items-center gap-2 bg-[var(--background)]/40 rounded-xl p-1 border border-[var(--card-border)]">
                                   <button 
-                                    onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, -1); }} 
-                                    className="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded-lg transition-colors text-white/60 hover:text-white"
+                                    onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, -1, item.selectedVariant); }} 
+                                    className="w-8 h-8 flex items-center justify-center hover:bg-[var(--card-bg)] rounded-lg transition-colors text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                                   >
                                     <Minus size={14} />
                                   </button>
-                                  <span className="text-sm font-black w-8 text-center">{item.quantity}</span>
+                                  <span className="text-sm font-black w-8 text-center text-[var(--text-primary)]">{item.quantity}</span>
                                   <button 
-                                    onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, 1); }} 
-                                    className="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded-lg transition-colors text-white/60 hover:text-white"
+                                    onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, 1, item.selectedVariant); }} 
+                                    className="w-8 h-8 flex items-center justify-center hover:bg-[var(--card-bg)] rounded-lg transition-colors text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                                   >
                                     <Plus size={14} />
                                   </button>
                                </div>
                                
                                <button 
-                                 onClick={(e) => { e.stopPropagation(); removeFromCart(item.id); }} 
+                                 onClick={(e) => { e.stopPropagation(); removeFromCart(item.id, item.selectedVariant); }} 
                                  className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all shadow-sm"
                                >
                                  <Trash2 size={16} />
@@ -439,8 +517,8 @@ export default function POSView() {
                 )}
              </div>
 
-             <div className="p-4 sm:p-6 bg-black/40 space-y-2 border-t border-white/5 shrink-0">
-                <div className="flex justify-between text-[10px] font-black text-white/30 uppercase tracking-widest">
+             <div className="p-4 sm:p-6 bg-[var(--glass-bg)] space-y-2 border-t border-[var(--card-border)] shrink-0">
+                <div className="flex justify-between text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">
                    <span>Subtotal</span>
                    <span>{settings.formatPrice(subtotal)}</span>
                 </div>
@@ -452,7 +530,7 @@ export default function POSView() {
                      <span>-{settings.formatPrice(discountAmount)}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-[10px] font-black text-white/30 uppercase tracking-widest">
+                <div className="flex justify-between text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">
                    <span>Taxes</span>
                    <span>{settings.formatPrice(totalTax)}</span>
                 </div>
@@ -465,12 +543,12 @@ export default function POSView() {
                       placeholder="Coupon Code..." 
                       value={couponCode}
                       onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                      className="w-full bg-white/5 border border-white/5 rounded-xl py-2.5 pl-9 pr-14 text-[10px] font-bold outline-none focus:border-pink-500/30 transition-all uppercase"
+                      className="w-full bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl py-2.5 pl-9 pr-14 text-[10px] font-bold outline-none focus:border-[var(--accent)]/30 transition-all uppercase text-[var(--text-primary)]"
                     />
-                    <Ticket size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/20" />
+                    <Ticket size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
                     <button 
                       onClick={handleApplyCoupon}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 bg-white text-black rounded-lg text-[8px] font-black uppercase tracking-tighter hover:scale-105 transition-all"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 bg-[var(--text-primary)] text-[var(--background)] rounded-lg text-[8px] font-black uppercase tracking-tighter hover:scale-105 transition-all"
                     >
                       Apply
                     </button>
@@ -489,9 +567,9 @@ export default function POSView() {
                   </button>
                 )}
 
-                <div className="flex justify-between text-xl font-black pt-3 mt-2 border-t border-white/10">
+                <div className="flex justify-between text-xl font-black pt-3 mt-2 border-t border-[var(--card-border)] text-[var(--text-primary)]">
                    <span className="uppercase tracking-tighter">Total</span>
-                   <span className="text-pink-400 font-black">{settings.formatPrice(total)}</span>
+                   <span className="text-[var(--accent)] font-black">{settings.formatPrice(total)}</span>
                 </div>
              </div>
           </ResinCard>
@@ -503,7 +581,7 @@ export default function POSView() {
                disabled={cart.length === 0}
                className={cn(
                  "w-full py-5 text-sm font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3",
-                 cart.length > 0 ? "bg-white text-black shadow-[0_20px_40px_rgba(0,0,0,0.3)]" : "opacity-20 cursor-not-allowed"
+                 cart.length > 0 ? "bg-[var(--text-primary)] text-[var(--background)] shadow-[0_20px_40px_rgba(0,0,0,0.3)]" : "opacity-20 cursor-not-allowed text-[var(--text-muted)]"
                )}
              >
                Proceed to Payment <ArrowRight size={18} />
@@ -515,22 +593,22 @@ export default function POSView() {
       {/* Payment Selection Modal */}
       <AnimatePresence>
         {showPaymentModal && (
-          <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 backdrop-blur-3xl bg-black/60">
+          <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 backdrop-blur-3xl bg-[var(--background)]/60">
              <motion.div
                initial={{ opacity: 0, scale: 0.9, y: 20 }}
                animate={{ opacity: 1, scale: 1, y: 0 }}
                exit={{ opacity: 0, scale: 0.9, y: 20 }}
                className="w-full max-w-[480px]"
              >
-                <ResinCard className="p-8 sm:p-10 !rounded-[2.5rem] bg-[#0c0c12] border-white/10 shadow-2xl relative" glowingColor="rgba(236,72,153,0.15)">
+                <ResinCard className="p-8 sm:p-10 !rounded-[2.5rem] bg-[var(--background)] border-[var(--card-border)] shadow-2xl relative" glowingColor="var(--accent-glow)">
                    <button 
                      onClick={() => setShowPaymentModal(false)}
-                     className="absolute top-6 right-6 p-2 rounded-full bg-white/5 border border-white/10 text-white/40 hover:text-white transition-colors"
+                     className="absolute top-6 right-6 p-2 rounded-full bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
                    >
                      <X size={20} />
                    </button>
 
-                   <h3 className="text-xs font-black uppercase tracking-[0.4em] text-white/20 mb-10 text-center">How would you like to pay?</h3>
+                   <h3 className="text-xs font-black uppercase tracking-[0.4em] text-[var(--text-muted)] mb-10 text-center">How would you like to pay?</h3>
                    
                    <div className="grid grid-cols-2 gap-3 mb-8">
                       {[
@@ -546,18 +624,18 @@ export default function POSView() {
                             "group relative p-4 rounded-2xl border transition-all duration-500 flex flex-col items-center gap-2",
                             paymentMethod === m.id 
                               ? `bg-${m.color}-500/20 border-${m.color}-500/40 shadow-[0_0_20px_rgba(255,255,255,0.05)] scale-[1.02]` 
-                              : "bg-white/5 border-white/5 text-white/30 hover:border-white/10 hover:bg-white/[0.07]"
+                              : "bg-[var(--card-bg)] border-[var(--card-border)] text-[var(--text-muted)] hover:border-[var(--card-border)] hover:bg-[var(--card-bg)]/80"
                           )}
                         >
                           <div className={cn(
                             "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500",
-                            paymentMethod === m.id ? `bg-${m.color}-500 text-white shadow-[0_0_15px_var(--tw-shadow-color)] shadow-${m.color}-500/50` : "bg-black/20 text-white/20 group-hover:text-white/60"
+                            paymentMethod === m.id ? `bg-${m.color}-500 text-white shadow-[0_0_15px_var(--tw-shadow-color)] shadow-${m.color}-500/50` : "bg-[var(--background)]/20 text-[var(--text-muted)] group-hover:text-[var(--text-primary)]"
                           )}>
                             {m.icon}
                           </div>
                           <span className={cn(
                             "text-[9px] font-black uppercase tracking-[0.2em] transition-colors",
-                            paymentMethod === m.id ? "text-white" : "text-white/20 group-hover:text-white/40"
+                            paymentMethod === m.id ? "text-white" : "text-[var(--text-muted)] group-hover:text-[var(--text-primary)]"
                           )}>{m.label}</span>
                           
                           {paymentMethod === m.id && (
@@ -572,13 +650,13 @@ export default function POSView() {
                    </div>
 
                    <div className="mb-6 relative group">
-                      <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-pink-400 transition-colors" />
+                      <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-pink-400 transition-colors" />
                       <input 
                         type="text" 
                         placeholder="Customer Email/Phone (Optional)"
                         value={customerPhone}
                         onChange={(e) => setCustomerPhone(e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 text-xs font-bold outline-none focus:border-pink-500/30 transition-all text-white placeholder:text-white/20"
+                        className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-2xl py-4 pl-12 pr-6 text-xs font-bold outline-none focus:border-[var(--accent)]/30 transition-all text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
                       />
                    </div>
 
@@ -590,7 +668,7 @@ export default function POSView() {
                      disabled={!paymentMethod}
                      className={cn(
                        "w-full py-5 text-sm font-black uppercase tracking-[0.3em] transition-all rounded-2xl",
-                       paymentMethod ? "bg-pink-600 border-pink-500 shadow-[0_0_30px_rgba(236,72,153,0.3)]" : "opacity-20 cursor-not-allowed"
+                       paymentMethod ? "bg-[var(--accent)] border-[var(--accent)] shadow-[0_0_30px_var(--accent-glow)] text-white" : "opacity-20 cursor-not-allowed"
                      )}
                    >
                      Confirm Payment
@@ -604,7 +682,7 @@ export default function POSView() {
       {/* Bill Modal */}
       <AnimatePresence>
         {showBill && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-6 backdrop-blur-3xl bg-black/80">
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-6 backdrop-blur-2xl bg-[var(--background)]/80">
              <motion.div
                initial={{ opacity: 0, y: 50, scale: 0.9 }}
                animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -613,7 +691,7 @@ export default function POSView() {
              >
                 <button 
                   onClick={resetPOS}
-                  className="absolute -top-12 right-0 text-white/40 hover:text-white transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-widest"
+                  className="absolute -top-12 right-0 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-widest"
                 >
                   Discard <X size={18} />
                 </button>
@@ -649,13 +727,13 @@ export default function POSView() {
                 <div className="mt-6 flex flex-col sm:flex-row justify-center gap-3 shrink-0">
                    <button 
                     onClick={handlePrint}
-                    className="flex-1 flex items-center justify-center gap-3 px-6 py-4 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl hover:scale-105 active:scale-95 transition-all"
+                    className="flex-1 flex items-center justify-center gap-3 px-6 py-4 bg-[var(--text-primary)] text-[var(--background)] rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl hover:scale-105 active:scale-95 transition-all"
                    >
                       <Printer size={18} /> Print 
                    </button>
                    <button 
                      onClick={handleSendToPhone}
-                     className="flex-1 flex items-center justify-center gap-3 px-6 py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl hover:scale-105 active:scale-95 transition-all relative overflow-hidden"
+                     className="flex-1 flex items-center justify-center gap-3 px-6 py-4 bg-[var(--accent)] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl hover:scale-105 active:scale-95 transition-all relative overflow-hidden"
                    >
                       <Smartphone size={18} /> 
                       {showPhoneToast ? "Sent!" : "Send to Phone"}
@@ -679,56 +757,86 @@ export default function POSView() {
       {/* Variant Picker Modal */}
       <AnimatePresence>
         {pickingVariantFor && (
-          <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 backdrop-blur-3xl bg-black/60">
+          <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 backdrop-blur-3xl bg-[var(--background)]/70">
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               className="w-full max-w-md"
             >
-              <ResinCard className="p-8 !rounded-[2.5rem] bg-[#0c0c12] border-white/10 shadow-2xl relative" glowingColor="rgba(236,72,153,0.15)">
+              <ResinCard className="p-8 !rounded-[2.5rem] bg-[var(--background)] border-[var(--card-border)] shadow-2xl relative" glowingColor="var(--accent-glow)">
                 <button 
                   onClick={() => setPickingVariantFor(null)}
-                  className="absolute top-6 right-6 p-2 rounded-full bg-white/5 border border-white/10 text-white/40 hover:text-white transition-colors"
+                  className="absolute top-6 right-6 p-2 rounded-full bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
                 >
                   <X size={20} />
                 </button>
 
-                <div className="mb-6">
-                  <h3 className="text-xs font-black uppercase tracking-[0.4em] text-white/20 mb-2">Select Variant</h3>
-                  <h2 className="text-xl font-black text-white">{pickingVariantFor.name}</h2>
+                <div className="flex gap-6 mb-8 items-start">
+                   <div className="w-24 h-24 rounded-2xl bg-[var(--card-bg)] border border-[var(--card-border)] flex items-center justify-center relative overflow-hidden shrink-0 shadow-resin">
+                      {pickingVariantFor.image ? (
+                        <img src={pickingVariantFor.image} alt={pickingVariantFor.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-xl font-black text-[var(--accent)]">{pickingVariantFor.article.split('-')[0]}</span>
+                      )}
+                   </div>
+                   <div className="min-w-0 pt-2">
+                     <h3 className="text-xs font-black uppercase tracking-[0.4em] text-[var(--text-muted)] mb-1">Select Variant</h3>
+                     <h2 className="text-xl font-black text-[var(--text-primary)] truncate">{pickingVariantFor.name}</h2>
+                     <p className="text-[10px] font-black text-[var(--accent)] uppercase tracking-widest mt-1">{pickingVariantFor.article}</p>
+                   </div>
                 </div>
 
                 <div className="space-y-6 max-h-[60vh] overflow-y-auto no-scrollbar pr-2">
                   {pickingVariantFor.variants.map((v) => (
                     <div key={v.color} className="space-y-3">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-white/40 flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: v.color.toLowerCase().includes('white') ? 'white' : v.color.toLowerCase().includes('black') ? '#333' : v.color }} />
-                        {v.color}
-                      </p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: v.color.toLowerCase().includes('white') ? 'white' : v.color.toLowerCase().includes('black') ? '#333' : v.color }} />
+                          {v.color}
+                        </p>
+                        {v.image && (
+                          <div className="w-8 h-8 rounded-lg overflow-hidden border border-[var(--card-border)] shadow-sm">
+                            <img src={v.image} alt={v.color} className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                      </div>
                       <div className="grid grid-cols-2 gap-2">
-                        {v.sizes.map((s) => (
-                          <button
-                            key={s.size}
-                            onClick={() => addToCart(pickingVariantFor, { color: v.color, size: s.size })}
-                            className="p-3 rounded-xl bg-white/5 border border-white/5 hover:border-pink-500/30 hover:bg-pink-500/5 transition-all text-left group"
-                          >
-                            <div className="flex justify-between items-center">
-                              <span className="text-xs font-bold text-white group-hover:text-pink-400 transition-colors">{s.size}</span>
-                              <span className={cn(
-                                "text-[9px] font-black px-1.5 py-0.5 rounded",
-                                s.stock < 10 ? "bg-rose-500/20 text-rose-400" : "bg-emerald-500/10 text-emerald-400"
-                              )}>
-                                {s.stock}
-                              </span>
-                            </div>
-                            {s.priceAdjustment !== 0 && (
-                              <p className="text-[8px] font-bold text-white/20 mt-1">
-                                {s.priceAdjustment > 0 ? '+' : ''}{settings.formatPrice(s.priceAdjustment)}
-                              </p>
-                            )}
-                          </button>
-                        ))}
+                        {v.sizes.map((s) => {
+                          const available = getAvailableStock(pickingVariantFor.id, v.color, s.size);
+                          return (
+                            <button
+                              key={s.size}
+                              disabled={available <= 0}
+                              onClick={() => addToCart(pickingVariantFor, { color: v.color, size: s.size })}
+                              className={cn(
+                                "p-3 rounded-xl border transition-all text-left relative overflow-hidden group",
+                                available <= 0 
+                                  ? "bg-[var(--card-bg)]/50 border-[var(--card-border)] opacity-50 cursor-not-allowed grayscale" 
+                                  : "bg-[var(--card-bg)] border-[var(--card-border)] hover:border-[var(--accent)]/30 hover:bg-[var(--accent)]/5"
+                              )}
+                            >
+                              <div className="flex justify-between items-center">
+                                <span className={cn(
+                                  "text-xs font-bold transition-colors",
+                                  available <= 0 ? "text-[var(--text-muted)]" : "text-[var(--text-primary)] group-hover:text-[var(--accent)]"
+                                )}>{s.size}</span>
+                                <span className={cn(
+                                  "text-[9px] font-black px-1.5 py-0.5 rounded",
+                                  available <= 0 ? "bg-black/20 text-white/20" : 
+                                  available < 5 ? "bg-rose-500/20 text-rose-400" : "bg-emerald-500/10 text-emerald-400"
+                                )}>
+                                  {available <= 0 ? "HOLD / SOLD" : available}
+                                </span>
+                              </div>
+                              {s.priceAdjustment !== 0 && (
+                                <p className="text-[8px] font-bold text-[var(--text-muted)] mt-1">
+                                  {s.priceAdjustment > 0 ? '+' : ''}{settings.formatPrice(s.priceAdjustment)}
+                                </p>
+                              )}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   ))}

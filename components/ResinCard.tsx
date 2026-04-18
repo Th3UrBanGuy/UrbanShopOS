@@ -3,6 +3,7 @@
 import React, { useRef, ReactNode } from 'react';
 import { motion, useMotionTemplate, useMotionValue, useSpring } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { useUIStore } from '@/store/uiStore';
 
 interface ResinCardProps {
   children: ReactNode;
@@ -11,7 +12,10 @@ interface ResinCardProps {
   glowingColor?: string;
 }
 
-export default function ResinCard({ children, className, onClick, glowingColor = 'rgba(255,255,255,0.15)' }: ResinCardProps) {
+export default function ResinCard({ children, className, onClick, glowingColor }: ResinCardProps) {
+  const { theme } = useUIStore();
+  const defaultGlow = theme === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(30, 64, 175, 0.12)';
+  const activeGlow = glowingColor || defaultGlow;
   const ref = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -35,8 +39,10 @@ export default function ResinCard({ children, className, onClick, glowingColor =
       whileTap={{ scale: 0.98, y: 0 }}
       transition={{ type: "spring", stiffness: 400, damping: 30 }}
       className={cn(
-        "relative overflow-hidden rounded-3xl bg-resin-base backdrop-blur-xl border border-white/10 group",
-        "shadow-resin hover:shadow-resin-hover transition-shadow duration-300 cursor-pointer",
+        "relative overflow-hidden transition-all duration-300 group",
+        "bg-[var(--card-bg)] backdrop-blur-xl border border-[var(--card-border)]",
+        "shadow-resin hover:shadow-resin-hover cursor-pointer",
+        "rounded-[var(--radius-base)]",
         className
       )}
     >
@@ -47,7 +53,7 @@ export default function ResinCard({ children, className, onClick, glowingColor =
           background: useMotionTemplate`
             radial-gradient(
               650px circle at ${mouseX}px ${mouseY}px,
-              ${glowingColor},
+              ${activeGlow},
               transparent 80%
             )
           `,

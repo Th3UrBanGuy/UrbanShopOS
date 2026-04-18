@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { LayoutGrid, Bell, Search, User, Menu, Lock } from 'lucide-react';
+import { LayoutGrid, Bell, Search, Menu, Lock } from 'lucide-react';
 import LiquidButton from '@/components/LiquidButton';
 import DashboardDock from '@/components/DashboardDock';
 import ClientOnly from '@/components/ClientOnly';
@@ -17,6 +17,7 @@ import SettingsView from '@/components/dashboard/SettingsView';
 import KhorochkhataView from '@/components/dashboard/KhorochkhataView';
 import PartiesView from '@/components/dashboard/PartiesView';
 import ManagementView from '@/components/dashboard/ManagementView';
+import UserManagementView from '@/components/dashboard/UserManagementView';
 import AdminProfileMenu from '@/components/dashboard/AdminProfileMenu';
 import ToastContainer from '@/components/ToastContainer';
 import { useDashboardStore, DashboardTab } from '@/store/dashboardStore';
@@ -73,6 +74,7 @@ export default function DashboardPage() {
       case 'Parties':    return canAccess('Parties')    ? <PartiesView />    : <AccessDenied tab="Parties" />;
       case 'Management': return canAccess('Management') ? <ManagementView /> : <AccessDenied tab="Management" />;
       case 'Settings':   return canAccess('Settings')   ? <SettingsView />  : <AccessDenied tab="Settings" />;
+      case 'Users':      return canAccess('Users')      ? <UserManagementView /> : <AccessDenied tab="Users" />;
       default:
         return (
           <div className="flex flex-col items-center justify-center h-[60vh] text-white/10">
@@ -87,7 +89,7 @@ export default function DashboardPage() {
   return (
     <ClientOnly>
       <AuthGuard>
-        <div className="h-screen bg-[#050508] text-white selection:bg-indigo-500/30 flex flex-col overflow-hidden">
+        <div className="h-screen bg-[var(--background)] text-[var(--text-primary)] selection:bg-[var(--accent)]/30 flex flex-col overflow-hidden">
       {/* Dynamic Background Glow */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div className="absolute top-0 left-1/4 w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-indigo-500/5 blur-[120px] rounded-full" />
@@ -95,7 +97,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Header - Compact & Responsive */}
-      <header className="px-4 py-2.5 md:px-6 md:py-3.5 flex items-center justify-between z-[60] backdrop-blur-xl bg-black/40 border-b border-white/5 shrink-0">
+      <header className="px-4 py-2.5 md:px-6 md:py-3.5 flex items-center justify-between z-[60] backdrop-blur-xl bg-[var(--glass-bg)] border-b border-[var(--card-border)] shrink-0">
         <div className="flex items-center gap-3 md:gap-4 group cursor-pointer">
           <motion.div 
             whileHover={{ rotate: 180 }}
@@ -108,7 +110,7 @@ export default function DashboardPage() {
             <h1 className="text-base md:text-xl font-black tracking-tighter uppercase leading-none truncate">
               {activeTab === 'Hub' ? 'The Hub' : activeTab}
             </h1>
-            <p className="hidden xs:block text-[8px] md:text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] mt-0.5">{settings.siteName} OS • 1.0.4</p>
+            <p className="hidden xs:block text-[8px] md:text-[9px] font-bold text-[var(--text-muted)] opacity-50 uppercase tracking-[0.2em] mt-0.5">{settings.siteName} OS • 1.0.4</p>
           </div>
         </div>
         
@@ -118,22 +120,22 @@ export default function DashboardPage() {
             whileHover={{ scale: 1.02 }}
             className="relative hidden lg:block"
           >
-            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" />
+            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
             <input 
               type="text" 
               placeholder="Command search..." 
-              className="bg-white/5 border border-white/5 rounded-full py-2.5 pl-12 pr-6 text-xs outline-none focus:bg-white/10 focus:border-indigo-500/30 focus:shadow-[0_0_20px_rgba(99,102,241,0.1)] transition-all w-64"
+              className="bg-[var(--input-bg)] border border-[var(--card-border)] rounded-full py-2.5 pl-12 pr-6 text-xs text-[var(--text-primary)] outline-none focus:bg-[var(--card-bg)] focus:border-[var(--accent)]/50 focus:shadow-[0_0_20px_var(--accent-glow)] transition-all w-64 placeholder:text-[var(--text-muted)]"
             />
           </motion.div>
           <div className="flex items-center gap-2">
             <LiquidButton variant="icon" className="w-9 h-9 md:w-10 md:h-10 p-0 relative">
               <Bell size={18} />
-              <div className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-[#050508]" />
+              <div className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-[var(--background)]" />
             </LiquidButton>
             <AdminProfileMenu />
             <motion.button 
               whileTap={{ scale: 0.9 }}
-              className="md:hidden w-9 h-9 flex items-center justify-center bg-white/5 rounded-xl border border-white/5"
+              className="md:hidden w-9 h-9 flex items-center justify-center bg-[var(--input-bg)] rounded-xl border border-[var(--card-border)] text-[var(--text-primary)]"
             >
               <Menu size={18} />
             </motion.button>

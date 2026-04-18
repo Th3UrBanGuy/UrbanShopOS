@@ -40,7 +40,7 @@ export function useFirebaseSync() {
     if (!initialized) {
       initialize();
     }
-  }, []);
+  }, [initialized, authStore, inventoryStore, userStore, couponStore, salesStore]);
 
   return { initialized, error };
 }

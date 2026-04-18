@@ -16,6 +16,8 @@ interface SalesState {
   getWeekRevenue: () => number;
   getRecentTransactions: (count: number) => SaleTransaction[];
   updateStatus: (id: string, status: SaleTransaction['status']) => Promise<void>;
+  getTransactionsByRange: (start: Date, end: Date) => SaleTransaction[];
+  getChartData: (range: '1D' | '1W' | '1M' | '1Y') => { label: string; value: number }[];
   syncFromFirebase: () => Promise<void>;
 }
 
@@ -97,6 +99,78 @@ export const useSalesStore = create<SalesState>()(
         } catch (e) {
           console.log('Offline: status update queued');
         }
+      },
+
+      getTransactionsByRange: (start, end) => {
+        return get().transactions.filter(tx => {
+          const d = new Date(tx.timestamp);
+          return d >= start && d <= end;
+        });
+      },
+
+      getChartData: (range) => {
+        const txs = get().transactions;
+        const now = new Date();
+        const data: { label: string; value: number }[] = [];
+
+        if (range === '1D') {
+          // Last 12 hours
+          for (let i = 11; i >= 0; i--) {
+            const h = new Date(now);
+            h.setHours(now.getHours() - i);
+            const label = h.getHours() + ':00';
+            const val = txs
+              .filter(t => {
+                const td = new Date(t.timestamp);
+                return td.getHours() === h.getHours() && td.toDateString() === h.toDateString();
+              })
+              .reduce((s, t) => s + t.total, 0);
+            data.push({ label, value: val });
+          }
+        } else if (range === '1W') {
+          // Last 7 days
+          for (let i = 6; i >= 0; i--) {
+            const d = new Date(now);
+            d.setDate(now.getDate() - i);
+            const label = d.toLocaleDateString([], { weekday: 'short' });
+            const val = txs
+              .filter(t => new Date(t.timestamp).toDateString() === d.toDateString())
+              .reduce((s, t) => s + t.total, 0);
+            data.push({ label, value: val });
+          }
+        } else if (range === '1M') {
+          // Last 4 weeks
+          for (let i = 3; i >= 0; i--) {
+            const d = new Date(now);
+            d.setDate(now.getDate() - (i * 7));
+            const label = 'Week ' + (4 - i);
+            const endWeek = new Date(d);
+            const startWeek = new Date(d);
+            startWeek.setDate(d.getDate() - 6);
+            const val = txs
+              .filter(t => {
+                const td = new Date(t.timestamp);
+                return td >= startWeek && td <= endWeek;
+              })
+              .reduce((s, t) => s + t.total, 0);
+            data.push({ label, value: val });
+          }
+        } else if (range === '1Y') {
+          // Last 12 months
+          for (let i = 11; i >= 0; i--) {
+            const m = new Date(now);
+            m.setMonth(now.getMonth() - i);
+            const label = m.toLocaleDateString([], { month: 'short' });
+            const val = txs
+              .filter(t => {
+                const td = new Date(t.timestamp);
+                return td.getMonth() === m.getMonth() && td.getFullYear() === m.getFullYear();
+              })
+              .reduce((s, t) => s + t.total, 0);
+            data.push({ label, value: val });
+          }
+        }
+        return data;
       },
     }),
     {

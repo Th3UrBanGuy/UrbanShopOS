@@ -7,9 +7,6 @@ import {
   Plus, 
   Search, 
   Handshake, 
-  ArrowRight, 
-  Calendar, 
-  DollarSign, 
   TrendingDown, 
   TrendingUp,
   History,
@@ -18,8 +15,7 @@ import {
   CreditCard,
   Building2,
   UserPlus,
-  Check,
-  ArrowLeft
+  Check
 } from 'lucide-react';
 import { usePartyStore } from '@/store/partyStore';
 import { useDashboardStore } from '@/store/dashboardStore';
@@ -30,7 +26,6 @@ import LiquidButton from '@/components/LiquidButton';
 
 export default function PartiesView() {
   const { parties, addParty, removeParty, addEntry, removeEntry, getBalance } = usePartyStore();
-  const { setActiveTab } = useDashboardStore();
   const settings = useSettingsStore();
 
   const [search, setSearch] = useState('');
@@ -92,13 +87,13 @@ export default function PartiesView() {
     <div className="space-y-6">
       {/* Header Stat Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <ResinCard className="p-5 flex items-center gap-4" glowingColor="rgba(99,102,241,0.2)">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20">
+        <ResinCard className="p-5 flex items-center gap-4" glowingColor="var(--accent-glow)">
+          <div className="w-12 h-12 rounded-2xl bg-[var(--accent)]/10 flex items-center justify-center text-[var(--accent)] border border-[var(--accent)]/20 shadow-resin">
             <Handshake size={24} />
           </div>
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Partners</p>
-            <p className="text-2xl font-black text-white">{parties.length}</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">Partners</p>
+            <p className="text-2xl font-black text-[var(--text-primary)]">{parties.length}</p>
           </div>
         </ResinCard>
 
@@ -107,8 +102,8 @@ export default function PartiesView() {
             <TrendingUp size={24} />
           </div>
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-white/40">All Deals</p>
-            <p className="text-2xl font-black text-white">
+            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">All Deals</p>
+            <p className="text-2xl font-black text-[var(--text-primary)]">
               {settings.formatPrice(parties.reduce((acc, p) => acc + getBalance(p.id).totalDeals, 0))}
             </p>
           </div>
@@ -119,8 +114,8 @@ export default function PartiesView() {
             <TrendingDown size={24} />
           </div>
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Due Balance</p>
-            <p className="text-2xl font-black text-white">
+            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">Due Balance</p>
+            <p className="text-2xl font-black text-[var(--text-primary)]">
               {settings.formatPrice(parties.reduce((acc, p) => acc + getBalance(p.id).remaining, 0))}
             </p>
           </div>
@@ -132,18 +127,18 @@ export default function PartiesView() {
         <div className="lg:col-span-4 space-y-4">
           <div className="flex items-center justify-between gap-4">
             <div className="relative flex-1">
-              <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" />
+              <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
               <input 
                 type="text"
                 placeholder="Search partners..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="w-full bg-white/5 border border-white/5 rounded-2xl py-3 pl-10 pr-4 text-xs font-bold outline-none focus:border-indigo-500/30 transition-all text-white"
+                className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-2xl py-3 pl-10 pr-4 text-xs font-bold outline-none focus:border-[var(--accent)]/30 transition-all text-[var(--text-primary)]"
               />
             </div>
             <LiquidButton 
               onClick={() => setShowAddParty(true)}
-              className="px-4 py-3 bg-indigo-600 rounded-2xl text-white shadow-lg"
+              className="px-4 py-3 bg-[var(--accent)] rounded-2xl text-white shadow-lg"
             >
               <UserPlus size={16} />
             </LiquidButton>
@@ -165,26 +160,26 @@ export default function PartiesView() {
                     className={cn(
                       "p-4 rounded-2xl border cursor-pointer transition-all duration-300 relative overflow-hidden group",
                       isActive 
-                        ? "bg-white/10 border-white/20 shadow-resin ring-1 ring-indigo-500/50" 
-                        : "bg-white/5 border-white/5 hover:bg-white/[0.08] hover:border-white/10"
+                        ? "bg-[var(--card-bg)] border-[var(--text-primary)]/20 shadow-resin ring-1 ring-[var(--accent)]/50" 
+                        : "bg-[var(--card-bg)] border-[var(--card-border)] hover:bg-[var(--card-bg)]/80 hover:border-[var(--text-muted)]"
                     )}
                   >
                     <div className="flex items-center justify-between relative z-10">
                       <div>
-                        <p className="text-xs font-black uppercase tracking-tight text-white">{party.name}</p>
-                        <p className="text-[9px] font-bold text-white/30 uppercase mt-0.5">{party.owner || 'No Owner Info'}</p>
+                        <p className="text-xs font-black uppercase tracking-tight text-[var(--text-primary)]">{party.name}</p>
+                        <p className="text-[9px] font-bold text-[var(--text-muted)] uppercase mt-0.5">{party.owner || 'No Owner Info'}</p>
                       </div>
                       <div className="text-right">
                         <p className={cn("text-xs font-black", b.remaining > 0 ? "text-rose-400" : "text-emerald-400")}>
                           {settings.formatPrice(b.remaining)}
                         </p>
-                        <p className="text-[8px] font-bold text-white/20 uppercase mt-0.5">Due Balance</p>
+                        <p className="text-[8px] font-bold text-[var(--text-muted)] uppercase mt-0.5">Due Balance</p>
                       </div>
                     </div>
                     {isActive && (
                       <motion.div 
                         layoutId="active-party-pill"
-                        className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-indigo-500 rounded-r-full" 
+                        className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-[var(--accent)] rounded-r-full" 
                       />
                     )}
                   </motion.div>
@@ -209,12 +204,12 @@ export default function PartiesView() {
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
                     <div className="space-y-1">
                       <div className="flex items-center gap-3">
-                        <h2 className="text-2xl font-black uppercase tracking-tighter text-white">{selectedParty.name}</h2>
-                        <span className="px-2 py-0.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-[8px] font-black uppercase text-indigo-400 tracking-widest">
+                        <h2 className="text-2xl font-black uppercase tracking-tighter text-[var(--text-primary)]">{selectedParty.name}</h2>
+                        <span className="px-2 py-0.5 rounded-lg bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[8px] font-black uppercase text-[var(--accent)] tracking-widest shadow-sm">
                           Active Partner
                         </span>
                       </div>
-                      <p className="text-xs font-bold text-white/40 uppercase tracking-widest flex items-center gap-2">
+                      <p className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest flex items-center gap-2">
                         <Building2 size={12} /> {selectedParty.owner} • Joined {new Date(selectedParty.createdAt).toLocaleDateString()}
                       </p>
                     </div>
@@ -222,7 +217,7 @@ export default function PartiesView() {
                     <div className="flex items-center gap-3">
                       <LiquidButton 
                         onClick={() => setShowAddEntry(true)}
-                        className="px-6 py-2.5 bg-white text-black rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2"
+                        className="px-6 py-2.5 bg-[var(--text-primary)] text-[var(--background)] rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2"
                       >
                         <Plus size={14} /> New Record
                       </LiquidButton>
@@ -237,20 +232,20 @@ export default function PartiesView() {
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-8 border-t border-white/5">
                     <div>
-                      <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mb-1">Total Deals</p>
-                      <p className="text-lg font-black text-white">{settings.formatPrice(balances.totalDeals)}</p>
+                      <p className="text-[8px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1">Total Deals</p>
+                      <p className="text-lg font-black text-[var(--text-primary)]">{settings.formatPrice(balances.totalDeals)}</p>
                     </div>
                     <div>
-                      <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mb-1">Total Paid</p>
+                      <p className="text-[8px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1">Total Paid</p>
                       <p className="text-lg font-black text-emerald-400">{settings.formatPrice(balances.totalPaid)}</p>
                     </div>
                     <div>
-                      <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mb-1">Due</p>
+                      <p className="text-[8px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1">Due</p>
                       <p className="text-lg font-black text-rose-400">{settings.formatPrice(balances.remaining)}</p>
                     </div>
                     <div>
-                      <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mb-1">Last Transaction</p>
-                      <p className="text-lg font-black text-white/60">
+                      <p className="text-[8px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1">Last Transaction</p>
+                      <p className="text-lg font-black text-[var(--text-muted)]">
                         {selectedParty.entries[0] ? new Date(selectedParty.entries[0].date).toLocaleDateString() : 'N/A'}
                       </p>
                     </div>
@@ -269,7 +264,7 @@ export default function PartiesView() {
                     {selectedParty.entries.map(entry => (
                       <div 
                         key={entry.id} 
-                        className="bg-white/5 border border-white/5 rounded-2xl p-4 flex items-center justify-between hover:bg-white/[0.08] transition-all"
+                        className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-4 flex items-center justify-between hover:bg-[var(--card-bg)]/80 transition-all"
                       >
                         <div className="flex items-center gap-4">
                           <div className={cn(
@@ -279,15 +274,15 @@ export default function PartiesView() {
                             {entry.type === 'deal' ? <Handshake size={18} /> : <CreditCard size={18} />}
                           </div>
                           <div>
-                            <p className="text-xs font-black text-white uppercase">{entry.description}</p>
-                            <p className="text-[9px] font-bold text-white/30 uppercase mt-0.5">
+                            <p className="text-xs font-black text-[var(--text-primary)] uppercase">{entry.description}</p>
+                            <p className="text-[9px] font-bold text-[var(--text-muted)] uppercase mt-0.5">
                               {new Date(entry.date).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                             </p>
                           </div>
                         </div>
                         <div className="text-right flex items-center gap-6">
                            <div>
-                              <p className="text-xs font-black text-white">
+                              <p className="text-xs font-black text-[var(--text-primary)]">
                                {entry.dealAmount > 0 && <span>Deal: {settings.formatPrice(entry.dealAmount)}</span>}
                                 {entry.dealAmount > 0 && entry.paidAmount > 0 && <span className="mx-2 opacity-20">|</span>}
                                 {entry.paidAmount > 0 && <span className="text-emerald-400">Payment: {settings.formatPrice(entry.paidAmount)}</span>}
@@ -295,7 +290,7 @@ export default function PartiesView() {
                            </div>
                            <button 
                              onClick={() => removeEntry(selectedParty.id, entry.id)}
-                             className="text-white/10 hover:text-rose-400 transition-colors"
+                             className="text-[var(--text-muted)] hover:text-rose-400 transition-colors"
                            >
                             <X size={14} />
                            </button>
@@ -312,7 +307,7 @@ export default function PartiesView() {
                 </div>
               </motion.div>
             ) : (
-              <div className="h-full flex flex-col items-center justify-center py-40 bg-white/5 border border-white/5 rounded-3xl border-dashed">
+              <div className="h-full flex flex-col items-center justify-center py-40 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-3xl border-dashed">
                 <Users size={40} className="text-white/10 mb-4" />
                 <p className="text-xs font-black uppercase tracking-widest text-white/20">Select a partner to view details</p>
               </div>
@@ -331,20 +326,20 @@ export default function PartiesView() {
               exit={{ opacity: 0, scale: 0.95 }}
               className="w-full max-w-md relative overflow-hidden"
             >
-              <ResinCard className="p-8 space-y-6" glowingColor="rgba(99,102,241,0.3)">
+              <ResinCard className="p-8 space-y-6" glowingColor="var(--accent-glow)">
                 <AnimatePresence>
                   {showSuccess && (
                     <motion.div 
                       initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
                       animate={{ opacity: 1, backdropFilter: 'blur(10px)' }}
                       exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
-                      className="absolute inset-0 z-50 bg-indigo-500/10 flex flex-col items-center justify-center space-y-3"
+                      className="absolute inset-0 z-50 bg-[var(--accent)]/10 flex flex-col items-center justify-center space-y-3"
                     >
                       <motion.div 
                         initial={{ scale: 0, rotate: -45 }}
                         animate={{ scale: 1, rotate: 0 }}
                         transition={{ type: 'spring', damping: 12 }}
-                        className="w-16 h-16 rounded-full bg-indigo-500 flex items-center justify-center text-white shadow-[0_0_30px_rgba(99,102,241,0.5)]"
+                        className="w-16 h-16 rounded-full bg-[var(--accent)] flex items-center justify-center text-white shadow-[0_0_30px_var(--accent-glow)]"
                       >
                         <Check size={32} strokeWidth={4} />
                       </motion.div>
@@ -360,7 +355,7 @@ export default function PartiesView() {
 
                 <form onSubmit={handleAddParty} className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Name</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Name</label>
                     <input 
                       autoFocus
                       type="text"
@@ -368,23 +363,23 @@ export default function PartiesView() {
                       value={partyName}
                       onChange={e => setPartyName(e.target.value)}
                       placeholder="e.g. Acme Resin Supplies"
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs font-bold outline-none focus:border-indigo-500/30 transition-all text-white"
+                      className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-2xl p-4 text-xs font-bold outline-none focus:border-[var(--accent)]/30 transition-all text-[var(--text-primary)]"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Owner Name</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Owner Name</label>
                     <input 
                       type="text"
                       value={partyOwner}
                       onChange={e => setPartyOwner(e.target.value)}
                       placeholder="e.g. John Doe (Optional)"
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs font-bold outline-none focus:border-indigo-500/30 transition-all text-white"
+                      className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-2xl p-4 text-xs font-bold outline-none focus:border-[var(--accent)]/30 transition-all text-[var(--text-primary)]"
                     />
                   </div>
                   <LiquidButton 
                     type="submit" 
                     disabled={showSuccess}
-                    className="w-full py-4 bg-indigo-600 rounded-2xl text-white font-black uppercase tracking-widest text-xs shadow-xl disabled:opacity-50"
+                    className="w-full py-4 bg-[var(--accent)] rounded-2xl text-white font-black uppercase tracking-widest text-xs shadow-xl disabled:opacity-50"
                   >
                     {showSuccess ? "Saved" : "Save Partner"}
                   </LiquidButton>
@@ -405,20 +400,20 @@ export default function PartiesView() {
               exit={{ opacity: 0, scale: 0.95 }}
               className="w-full max-w-md relative overflow-hidden"
             >
-              <ResinCard className="p-8 space-y-6" glowingColor="rgba(99,102,241,0.3)">
+              <ResinCard className="p-8 space-y-6" glowingColor="var(--accent-glow)">
                 <AnimatePresence>
                   {showSuccess && (
                     <motion.div 
                       initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
                       animate={{ opacity: 1, backdropFilter: 'blur(10px)' }}
                       exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
-                      className="absolute inset-0 z-50 bg-indigo-500/10 flex flex-col items-center justify-center space-y-3"
+                      className="absolute inset-0 z-50 bg-[var(--accent)]/10 flex flex-col items-center justify-center space-y-3"
                     >
                       <motion.div 
                         initial={{ scale: 0, rotate: -45 }}
                         animate={{ scale: 1, rotate: 0 }}
                         transition={{ type: 'spring', damping: 12 }}
-                        className="w-16 h-16 rounded-full bg-indigo-500 flex items-center justify-center text-white shadow-[0_0_30px_rgba(99,102,241,0.5)]"
+                        className="w-16 h-16 rounded-full bg-[var(--accent)] flex items-center justify-center text-white shadow-[0_0_30px_var(--accent-glow)]"
                       >
                         <Check size={32} strokeWidth={4} />
                       </motion.div>
@@ -432,20 +427,20 @@ export default function PartiesView() {
                   <button onClick={() => setShowAddEntry(false)} className="text-white/40 hover:text-white"><X size={20} /></button>
                 </div>
 
-                <div className="flex p-1 bg-white/5 rounded-xl gap-1">
+                <div className="flex p-1 bg-[var(--input-bg)] rounded-xl gap-1">
                   <button 
                     onClick={() => setEntryType('deal')}
-                    className={cn("flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all", entryType === 'deal' ? "bg-white text-black" : "text-white/40 hover:text-white")}
+                    className={cn("flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all", entryType === 'deal' ? "bg-[var(--text-primary)] text-[var(--background)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]")}
                   >New Deal</button>
                   <button 
                     onClick={() => setEntryType('payment')}
-                    className={cn("flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all", entryType === 'payment' ? "bg-white text-black" : "text-white/40 hover:text-white")}
+                    className={cn("flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all", entryType === 'payment' ? "bg-[var(--text-primary)] text-[var(--background)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]")}
                   >Payment</button>
                 </div>
 
                 <form onSubmit={handleAddEntry} className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Paid for? (Purpose)</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Paid for? (Purpose)</label>
                     <input 
                       autoFocus
                       required
@@ -453,29 +448,29 @@ export default function PartiesView() {
                       value={entryDesc}
                       onChange={e => setEntryDesc(e.target.value)}
                       placeholder={entryType === 'deal' ? "Supply of epoxy resin batch #4" : "Weekly settlement payment"}
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs font-bold outline-none focus:border-indigo-500/30 transition-all text-white"
+                      className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-2xl p-4 text-xs font-bold outline-none focus:border-[var(--accent)]/30 transition-all text-[var(--text-primary)]"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Total Bill</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Total Bill</label>
                       <input 
                         type="number"
                         value={entryDeal}
                         onChange={e => setEntryDeal(e.target.value)}
                         placeholder="0.00"
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs font-bold outline-none focus:border-indigo-500/30 transition-all text-white"
+                        className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-2xl p-4 text-xs font-bold outline-none focus:border-[var(--accent)]/30 transition-all text-[var(--text-primary)]"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Payment</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Payment</label>
                       <input 
                         type="number"
                         value={entryPaid}
                         onChange={e => setEntryPaid(e.target.value)}
                         placeholder="0.00"
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs font-bold outline-none focus:border-indigo-500/30 transition-all text-white"
+                        className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-2xl p-4 text-xs font-bold outline-none focus:border-[var(--accent)]/30 transition-all text-[var(--text-primary)]"
                       />
                     </div>
                   </div>
@@ -483,7 +478,7 @@ export default function PartiesView() {
                   <LiquidButton 
                     type="submit" 
                     disabled={showSuccess}
-                    className="w-full py-4 bg-indigo-600 rounded-2xl text-white font-black uppercase tracking-widest text-xs shadow-xl disabled:opacity-50"
+                    className="w-full py-4 bg-[var(--accent)] rounded-2xl text-white font-black uppercase tracking-widest text-xs shadow-xl disabled:opacity-50"
                   >
                     {showSuccess ? "Saved" : "Save Record"}
                   </LiquidButton>
