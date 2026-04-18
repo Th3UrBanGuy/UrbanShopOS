@@ -18,13 +18,14 @@ import { useCartStore } from '@/store/cartStore';
 import ResinCard from '@/components/ResinCard';
 import LiquidButton from '@/components/LiquidButton';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
   const router = useRouter();
-  const { products, getAvailableStock, addHold, removeHold, cleanupHolds } = useInventoryStore();
+  const { products, getAvailableStock, addHold, cleanupHolds } = useInventoryStore();
   const addItem = useCartStore((s) => s.addItem);
-  const removeItem = useCartStore((s) => s.removeItem);
+  // removeItem not used directly; handled by CartDrawer
   const toggleCart = useCartStore((s) => s.toggleOpen);
 
   const sessionId = React.useMemo(() => {
@@ -128,10 +129,12 @@ export default function ProductDetailPage() {
                       className="w-full h-full flex items-center justify-center p-12"
                     >
                        {(selectedVariant?.image || product.image) ? (
-                         <img 
-                           src={selectedVariant?.image || product.image} 
+                         <Image
+                           src={selectedVariant?.image || product.image || '/placeholder.png'} 
                            alt={product.name} 
-                           className="w-full h-full object-contain drop-shadow-[0_20px_50px_rgba(255,255,255,0.1)] transition-transform duration-700 group-hover:scale-110" 
+                           fill
+                           unoptimized
+                           className="object-contain drop-shadow-[0_20px_50px_rgba(255,255,255,0.1)] transition-transform duration-700 group-hover:scale-110" 
                          />
                        ) : (
                          <div className="relative">

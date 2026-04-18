@@ -46,7 +46,7 @@ function formatTimeAgo(dateString: string) {
 }
 
 export default function SalesView() {
-  const { transactions, updateStatus, getTransactionsByRange } = useSalesStore();
+  const { transactions, updateStatus } = useSalesStore();
   const settings = useSettingsStore();
   const [selectedOrder, setSelectedOrder] = useState<SaleTransaction | null>(null);
   const [activeTab, setActiveTab] = useState<'all' | 'pos' | 'online'>('all');
@@ -94,15 +94,6 @@ export default function SalesView() {
     .filter(t => new Date(t.timestamp) >= weekAgo)
     .reduce((sum, t) => sum + t.total, 0);
 
-  const getPaymentColor = (method: string) => {
-    switch (method?.toLowerCase()) {
-      case 'card': return 'indigo';
-      case 'cash': return 'emerald';
-      case 'wallet': return 'purple';
-      case 'online payment': return 'cyan';
-      default: return 'rose';
-    }
-  };
 
   const statusIcons = {
     pending: <Clock size={12} />,

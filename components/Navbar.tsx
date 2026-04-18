@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Menu, X, ShieldAlert, Unlock, Package, ChevronRight, SearchIcon, Sparkles, Truck, MapPin, Mail, Phone, CreditCard, Calendar, BadgeCheck, Clock, CheckCircle2, Zap, Activity, ShieldCheck, Box } from 'lucide-react';
+import { ShoppingBag, Menu, X, ShieldAlert, Unlock, Package, ChevronRight, SearchIcon, Sparkles, Truck, MapPin, Phone, CreditCard, Calendar, Activity, ShieldCheck, Box } from 'lucide-react';
 import LiquidButton from '@/components/LiquidButton';
 import { useCartStore } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';

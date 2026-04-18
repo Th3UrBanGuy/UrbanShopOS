@@ -4,9 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Wallet, 
-  Plus, 
   Trash2, 
-  CalendarDays, 
   Receipt, 
   Search, 
   Check, 
@@ -15,10 +13,8 @@ import {
   FileSpreadsheet,
   Tag,
   ArrowUpRight,
-  Filter,
   PieChart,
   Target,
-  ChevronRight,
   AlertCircle
 } from 'lucide-react';
 import ResinCard from '@/components/ResinCard';
@@ -29,7 +25,7 @@ import { usePartyStore } from '@/store/partyStore';
 import { cn } from '@/lib/utils';
 import { exportToCSV, printReport } from '@/lib/exportUtils';
 
-const CATEGORIES: { id: ExpenseCategory; label: string; icon: any; color: string }[] = [
+const CATEGORIES: { id: ExpenseCategory; label: string; icon: React.ReactNode; color: string }[] = [
   { id: 'Stock', label: 'Stock / Inventory', icon: <Target size={14} />, color: 'emerald' },
   { id: 'Utility', label: 'Bills / Utility', icon: <AlertCircle size={14} />, color: 'amber' },
   { id: 'Staff', label: 'Staff / Salary', icon: <History size={14} />, color: 'indigo' },

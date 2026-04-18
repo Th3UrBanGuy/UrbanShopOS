@@ -18,7 +18,6 @@ import {
   Check
 } from 'lucide-react';
 import { usePartyStore } from '@/store/partyStore';
-import { useDashboardStore } from '@/store/dashboardStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { cn } from '@/lib/utils';
 import ResinCard from '@/components/ResinCard';

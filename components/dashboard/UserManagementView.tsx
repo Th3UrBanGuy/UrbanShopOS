@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   UserPlus, Trash2, Edit2, X, Check, Shield, Crown, User as UserIcon, Users,
-  Eye, EyeOff, Key, ChevronDown, ChevronRight, AlertTriangle, Lock,
-  LayoutGrid, BarChart3, Package, Ticket, ShoppingCart, BookOpen, Settings, Wallet, ArrowLeft, ShieldCheck
+  Eye, EyeOff, Key, ChevronDown, AlertTriangle, Lock,
+  LayoutGrid, BarChart3, Package, Ticket, ShoppingCart, Settings, Wallet, ArrowLeft, ShieldCheck
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useDashboardStore, DashboardTab } from '@/store/dashboardStore';

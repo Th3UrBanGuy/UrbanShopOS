@@ -26,14 +26,16 @@ import { useCartStore } from '@/store/cartStore';
 import { useInventoryStore } from '@/store/inventoryStore';
 import { useSalesStore } from '@/store/salesStore';
 import { useSettingsStore } from '@/store/settingsStore';
-import { useCouponStore, Coupon } from '@/store/couponStore';
+import { Coupon, useCouponStore } from '@/store/couponStore';
+import { CartItem } from '@/types';
+import Image from 'next/image';
 import LiquidButton from '@/components/LiquidButton';
 import { cn } from '@/lib/utils';
 import { printReceipt } from '@/lib/printReceipt';
 
 export default function CartDrawer() {
   const { items, isOpen, setOpen, removeItem, updateQuantity, clearCart, getSubtotal, getTaxTotal } = useCartStore();
-  const { decrementStock } = useInventoryStore();
+  // decrementStock handled server-side; not used in client checkout flow
   const { addTransaction } = useSalesStore();
   const settings = useSettingsStore();
   const { validateCoupon, incrementUses } = useCouponStore();
@@ -50,7 +52,7 @@ export default function CartDrawer() {
   
   // Snapshot for success view to fix $0 bug
   const [completedOrder, setCompletedOrder] = useState<{
-    items: any[];
+    items: CartItem[];
     subtotal: number;
     taxTotal: number;
     total: number;
@@ -314,7 +316,7 @@ export default function CartDrawer() {
                         <div className="flex gap-4 mb-3">
                           <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center relative overflow-hidden shrink-0 shadow-inner">
                             {item.image ? (
-                              <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                              <Image src={item.image} alt={item.name} fill unoptimized className="object-cover" />
                             ) : (
                               <div className="text-[10px] font-black text-white/10 uppercase tracking-tighter">Vault</div>
                             )}

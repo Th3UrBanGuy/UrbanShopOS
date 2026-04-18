@@ -1,24 +1,13 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
-import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from 'framer-motion';
-import { 
-  TrendingUp, 
-  BarChart3, 
-  LayoutGrid, 
-  Users, 
-  Zap, 
-  ArrowUpRight,
-  ShoppingBag,
-  MousePointer2,
-  Calendar,
-  AlertCircle
-} from 'lucide-react';
+import React, { useState } from 'react';
+import { motion, useMotionValue, useSpring, AnimatePresence } from 'framer-motion';
+import { TrendingUp, BarChart3, Users, Zap, ArrowUpRight, ShoppingBag } from 'lucide-react';
 import ResinCard from '@/components/ResinCard';
 import { cn } from '@/lib/utils';
 import { useDashboardStore } from '@/store/dashboardStore';
 import { useSalesStore } from '@/store/salesStore';
-import { useInventoryStore } from '@/store/inventoryStore';
+import { useInventoryStore, InventoryProduct } from '@/store/inventoryStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useUIStore } from '@/store/uiStore';
 
@@ -84,8 +73,8 @@ function InventoryTile({ className }: { className?: string }) {
   const { products } = useInventoryStore();
   const { theme } = useUIStore();
   
-  // Get top 3 products with lowest stock percentage or just first 3
-  const stocks = itemsToStockTiles(products, theme).slice(0, 3);
+  // Get top 3 products with lowest stock percentage
+  const stocks = itemsToStockTiles(products).slice(0, 3);
 
   return (
     <ResinCard className={cn("p-6 md:p-8 h-full group", className)} glowingColor="rgba(255,191,0,0.08)">
@@ -165,7 +154,7 @@ function SalesFeedTile({ className }: { className?: string }) {
   );
 }
 
-function itemsToStockTiles(products: any[], theme: string) {
+function itemsToStockTiles(products: InventoryProduct[]) {
   return products.map(p => {
     // Basic stock percentage calculation (max 100 for visual)
     const stockPercent = Math.min(100, Math.floor((p.stock / 100) * 100));
@@ -182,13 +171,13 @@ export default function HubView() {
   const setActiveTab = useDashboardStore((state) => state.setActiveTab);
   const { transactions, getChartData } = useSalesStore();
   const settings = useSettingsStore();
-  const { theme } = useUIStore();
+  useUIStore();
 
   const chartData = getChartData(period);
   const totalRevenue = transactions.reduce((acc, tx) => acc + tx.total, 0);
 
   // Derived dynamic stats
-  const uniqueCustomers = new Set(transactions.map(tx => tx.customerPhone || tx.customerName)).size;
+  // uniqueCustomers available if needed: new Set(transactions.map(tx => tx.customerPhone || tx.customerName)).size
   const totalVisitors = 42800 + transactions.length * 15; // Persistent simulation base + multiplier
   const posCount = transactions.filter(t => t.channel === 'pos').length;
   const onlineCount = transactions.filter(t => t.channel === 'online').length;
@@ -212,7 +201,7 @@ export default function HubView() {
                 {['1D', '1W', '1M', '1Y'].map((t) => (
                   <button 
                     key={t} 
-                    onClick={() => setPeriod(t as any)}
+                    onClick={() => setPeriod(t as '1D' | '1W' | '1M' | '1Y')}
                     className={cn(
                       "relative px-5 py-2.5 rounded-xl text-[10px] font-black transition-all z-10 uppercase tracking-widest",
                       period === t ? 'text-[var(--background)]' : 'text-[var(--text-muted)] opacity-40 hover:opacity-60'

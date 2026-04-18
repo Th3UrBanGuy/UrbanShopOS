@@ -13,6 +13,7 @@ import { useCouponStore, Coupon } from '@/store/couponStore';
 import { useToastStore } from '@/store/toastStore';
 import TerminalSettings from './TerminalSettings';
 import ReceiptDocument from './ReceiptDocument';
+import Image from 'next/image';
 import { printReceipt } from '@/lib/printReceipt';
 import { Ticket, BadgeCheck, BadgeAlert } from 'lucide-react';
 
@@ -438,7 +439,7 @@ export default function POSView() {
                           <>
                             <div className="w-12 h-12 rounded-lg bg-[var(--input-bg)] border border-[var(--card-border)] flex items-center justify-center relative overflow-hidden mb-1 shadow-inner">
                               {item.image ? (
-                                <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                <Image src={item.image} alt={item.name} fill unoptimized className="object-cover" />
                               ) : (
                                 <span className="text-[10px] font-black text-[var(--accent)]">{item.quantity}</span>
                               )}
@@ -456,7 +457,7 @@ export default function POSView() {
                               <div className="flex items-center gap-3 min-w-0">
                                 <div className="w-12 h-12 rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] flex items-center justify-center relative overflow-hidden shrink-0 shadow-resin">
                                   {item.image ? (
-                                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                    <Image src={item.image} alt={item.name} fill unoptimized className="object-cover" />
                                   ) : (
                                     <span className="text-[10px] font-black uppercase text-[var(--accent)]">{item.article.split('-')[0]}</span>
                                   )}
@@ -775,7 +776,7 @@ export default function POSView() {
                 <div className="flex gap-6 mb-8 items-start">
                    <div className="w-24 h-24 rounded-2xl bg-[var(--card-bg)] border border-[var(--card-border)] flex items-center justify-center relative overflow-hidden shrink-0 shadow-resin">
                       {pickingVariantFor.image ? (
-                        <img src={pickingVariantFor.image} alt={pickingVariantFor.name} className="w-full h-full object-cover" />
+                        <Image src={pickingVariantFor.image} alt={pickingVariantFor.name} fill unoptimized className="object-cover" />
                       ) : (
                         <span className="text-xl font-black text-[var(--accent)]">{pickingVariantFor.article.split('-')[0]}</span>
                       )}
@@ -797,7 +798,7 @@ export default function POSView() {
                         </p>
                         {v.image && (
                           <div className="w-8 h-8 rounded-lg overflow-hidden border border-[var(--card-border)] shadow-sm">
-                            <img src={v.image} alt={v.color} className="w-full h-full object-cover" />
+                            <Image src={v.image} alt={v.color} fill unoptimized className="object-cover" />
                           </div>
                         )}
                       </div>

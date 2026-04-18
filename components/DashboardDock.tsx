@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, useMotionValue, useSpring, useTransform, MotionValue, AnimatePresence } from 'framer-motion';
-import { LayoutGrid, ShoppingCart, BarChart3, ArrowLeft, Wallet, Layers, Package, Settings as SettingsIcon } from 'lucide-react';
+import { LayoutGrid, ShoppingCart, BarChart3, ArrowLeft, Wallet, Layers } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 import { useDashboardStore, DashboardTab } from '@/store/dashboardStore';

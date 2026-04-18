@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   User, Settings, LogOut, ChevronRight, Edit2, X, Save,
-  Bell, Shield, Moon, Palette, Key, LayoutGrid
+  Bell, Shield, Moon, Key, LayoutGrid
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
@@ -18,12 +18,6 @@ interface UserProfile {
   name: string;
   email: string;
   role: string;
-}
-
-interface AccountSettings {
-  notifications: boolean;
-  darkMode: boolean;
-  compactView: boolean;
 }
 
 type ActiveTab = 'profile' | 'settings';
@@ -81,11 +75,6 @@ export default function AdminProfileMenu() {
     setEditing(false);
   };
 
-  const toggleSetting = (key: string) => {
-    if (key === 'darkMode') setDarkMode(!isDarkMode);
-    if (key === 'compactView') setCompactView(!isCompactView);
-    if (key === 'notifications') setPushNotifications(!pushNotifications);
-  };
 
   const handlePinChange = async () => {
     if (!currentUser) return;
@@ -118,11 +107,6 @@ export default function AdminProfileMenu() {
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
-  const settingsItems = [
-    { key: 'notifications' as const, icon: Bell, label: 'Push Notifications', desc: 'Dashboard alerts and updates' },
-    { key: 'darkMode' as const, icon: Moon, label: 'Dark Interface', desc: 'Always use dark theme' },
-    { key: 'compactView' as const, icon: Palette, label: 'Compact View', desc: 'Dense data layout mode' },
-  ];
 
   const modal = mounted && modalOpen
     ? createPortal(
@@ -521,9 +505,9 @@ export default function AdminProfileMenu() {
 
 /* ── Helpers ── */
 function ToggleRow({ 
-  icon: Icon, label, sub, value, onChange, accent = 'var(--accent)' 
+  icon: Icon, label, sub, value, onChange 
 }: { 
-  icon: React.ElementType; label: string; sub: string; value: boolean; onChange: (v: boolean) => void; accent?: string;
+  icon: React.ElementType; label: string; sub: string; value: boolean; onChange: (v: boolean) => void;
 }) {
   return (
     <div className="flex items-center justify-between p-4 rounded-[2rem] bg-[var(--card-bg)] border border-[var(--card-border)] hover:bg-[var(--card-bg)]/80 transition-colors">

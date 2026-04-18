@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type ExportRow = { [key: string]: any };
+
 export function printReport({ 
   title, 
   subtitle,
@@ -8,8 +11,8 @@ export function printReport({
 }: { 
   title: string; 
   subtitle?: string;
-  data: any[]; 
-  columns: { key: string; label: string; format?: (val: any) => string }[];
+  data: ExportRow[]; 
+  columns: { key: string; label: string; format?: (val: unknown) => string }[];
   summary?: { label: string; value: string }[];
   settings: { 
     siteName: string; 
@@ -375,7 +378,7 @@ export function printReport({
   printWindow.document.close();
 }
 
-export function exportToCSV(data: any[], fileName: string) {
+export function exportToCSV(data: ExportRow[], fileName: string) {
   if (data.length === 0) return;
   
   const headers = Object.keys(data[0]).join(',');

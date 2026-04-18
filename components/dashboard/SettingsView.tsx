@@ -2,64 +2,21 @@
 
 import React, { useState } from 'react';
 import {
-  Globe, Percent, Printer, Palette, Type, Check,
-  Layout, ChevronDown, Zap, Shield, Bell, Sliders,
+  Globe, Percent, Palette, Type, Check,
+  Layout, Zap, Bell, Sliders,
   Eye, EyeOff, RotateCcw, Star, AlignLeft, AlignCenter,
   AlignRight, Minus, FileText, Hash, Clock, Calendar,
   CreditCard, Barcode, PenLine, Scissors, Layers, Sparkles, Phone, ArrowLeft
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useSettingsStore, BillDesign } from '@/store/settingsStore';
 import { useDashboardStore } from '@/store/dashboardStore';
-import { useAuthStore } from '@/store/authStore';
 import { useToastStore } from '@/store/toastStore';
 import ReceiptDocument from './ReceiptDocument';
-import { printReceipt } from '@/lib/printReceipt';
-import UserManagementView from '@/components/dashboard/UserManagementView';
 
 // ─── UI Primitives ──────────────────────────────────────────────────────────
 
-function SectionAccordion({
-  icon: Icon, title, accent = '#6366f1', defaultOpen = false, children
-}: {
-  icon: React.ElementType; title: string; accent?: string;
-  defaultOpen?: boolean; children: React.ReactNode;
-}) {
-  const [open, setOpen] = useState(defaultOpen);
-  return (
-    <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] overflow-hidden">
-      <button
-        onClick={() => setOpen(v => !v)}
-        className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-[var(--card-bg)] transition-colors"
-      >
-        <div className="w-8 h-8 shrink-0 rounded-xl flex items-center justify-center"
-          style={{ background: accent + '18', border: `1px solid ${accent}30`, color: accent }}>
-          <Icon size={15} />
-        </div>
-        <span className="flex-1 text-sm font-bold uppercase tracking-widest text-[var(--text-primary)]/80">{title}</span>
-        <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>
-          <ChevronDown size={14} className="text-[var(--text-muted)]" />
-        </motion.div>
-      </button>
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.22, ease: 'easeInOut' }}
-            className="overflow-hidden"
-          >
-            <div className="px-5 pb-6 pt-2 border-t border-[var(--card-border)] space-y-5">
-              {children}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -227,7 +184,6 @@ export default function SettingsView() {
   const { setActiveTab: setGlobalTab } = useDashboardStore();
   const [d, setD] = useState<BillDesign>(settings.billDesign);
   const { addToast } = useToastStore();
-  const { currentUser } = useAuthStore();
 
   const upd = (updates: Partial<BillDesign>) => setD(prev => ({ ...prev, ...updates }));
 
@@ -236,25 +192,6 @@ export default function SettingsView() {
     addToast('Design settings applied successfully', 'success');
   };
 
-  const handleTest = () => {
-    const dummyTx = {
-      id: 'TEST-1000',
-      timestamp: new Date().toISOString(),
-      items: [
-        { id: 1, productId: 1, name: 'Cyberpunk Keycap', article: 'KC-001', variant: 'Neon', price: 45.0, quantity: 1, tax: 3.6 },
-        { id: 2, productId: 2, name: 'Resin Switch Lube', article: 'SL-002', variant: 'Standard', price: 15.0, quantity: 2, tax: 2.4 }
-      ],
-      subtotal: 75.0,
-      taxTotal: 6.0,
-      discount: 0,
-      total: 81.0,
-      paymentMethod: 'Credit Card',
-      channel: 'pos' as const,
-      status: 'completed' as const,
-    };
-    printReceipt(dummyTx, { ...settings, billDesign: d });
-    addToast('Test receipt generated', 'info');
-  };
 
   const [notifs, setNotifs] = useState(true);
   const [autoSave, setAutoSave] = useState(true);
