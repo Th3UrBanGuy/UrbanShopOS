@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     const htmlReceipt = `
       <div style="font-family: monospace; max-width: 400px; margin: 0 auto; padding: 20px; background: #fff; border: 1px solid #ccc; border-radius: 8px;">
         <div style="text-align: center; margin-bottom: 20px;">
-          <h1 style="margin: 0; font-size: 24px; font-weight: 900;">${storeName || 'Aero Resin'}</h1>
+          <h1 style="margin: 0; font-size: 24px; font-weight: 900;">${storeName || 'UrbanShopOS'}</h1>
           <p style="margin: 5px 0; color: #666; font-size: 14px;">DIGITAL RECEIPT</p>
         </div>
         
@@ -77,7 +77,7 @@ export async function POST(req: Request) {
     `;
 
     const info = await transporter.sendMail({
-      from: `"${storeName || 'Aero Resin'}" <${process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER}>`,
+      from: `"${storeName || 'UrbanShopOS'}" <${process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER}>`,
       to,
       subject: subject || 'Your Digital Receipt',
       html: htmlReceipt,

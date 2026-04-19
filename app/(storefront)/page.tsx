@@ -54,22 +54,22 @@ export default function Home() {
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-md border border-white/10 mb-8 text-sm font-medium text-indigo-200">
                 <Star size={14} className="fill-indigo-400 text-indigo-400" />
-                <span>Introducing the Fluid Collection</span>
+                <span>Smart Shop Management</span>
               </div>
-              <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-6 leading-none">
+              <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-6 leading-none uppercase">
                 FEEL THE <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">
-                  DIFFERENCE
+                  EFFORTLESS
                 </span>
               </h1>
-              <p className="text-lg md:text-xl text-white/60 max-w-xl mx-auto mb-10 font-light">
-                Immerse yourself in a tactile digital experience. Our new lineup
-                features materials that bend light and defy expectations.
+              <p className="text-base md:text-xl text-white/60 max-w-xl mx-auto mb-10 font-light">
+                Manage your business with clarity and speed. UrbanShopOS 
+                brings together sales, stock, and staff in one beautiful place.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link href="/market">
                   <LiquidButton>
-                    Explore Catalog <ArrowRight size={18} />
+                    Shop Products <ArrowRight size={18} />
                   </LiquidButton>
                 </Link>
                 <LiquidButton variant="secondary" onClick={() => setIsVideoOpen(true)}>
@@ -222,8 +222,8 @@ export default function Home() {
                 />
                 <div className="relative z-10 text-center flex flex-col items-center">
                   <Play size={64} className="text-white/20 mb-6" />
-                  <h3 className="text-2xl font-black uppercase tracking-[0.2em] text-white/40">Aero Resin Demo</h3>
-                  <p className="text-sm font-medium text-white/20 mt-2 uppercase tracking-widest">Connect to reality</p>
+                  <h3 className="text-2xl font-black uppercase tracking-[0.2em] text-white/40">UrbanShopOS Demo</h3>
+                  <p className="text-sm font-medium text-white/20 mt-2 uppercase tracking-widest">Operating at Scale</p>
                 </div>
               </div>
             </motion.div>

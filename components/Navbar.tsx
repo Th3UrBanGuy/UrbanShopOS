@@ -72,7 +72,7 @@ export default function Navbar() {
             href="/"
             className="text-xl font-black tracking-tighter bg-gradient-to-r from-white to-white/50 bg-clip-text text-transparent"
           >
-            AERO<span className="font-light">RESIN</span>
+            Urban<span className="font-light">ShopOS</span>
           </Link>
 
           {/* Desktop Links */}

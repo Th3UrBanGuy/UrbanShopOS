@@ -266,7 +266,7 @@ export default function HubView() {
              >
                <BarChart3 size={24} />
              </motion.div>
-             <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em] mb-1">PoS Orders</p>
+             <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em] mb-1">Shop Sales</p>
             <p className="text-3xl font-black tracking-tighter text-[var(--text-primary)]">{posCount}</p>
          </ResinCard>
       </div>
@@ -280,7 +280,7 @@ export default function HubView() {
               >
                 <ShoppingBag size={24} />
               </motion.div>
-              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] opacity-20">Store Orders</h4>
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] opacity-20">Website Orders</h4>
               <div className="flex items-center gap-2 mt-1">
                  <p className="text-[20px] font-black text-[var(--text-primary)] tracking-widest uppercase">{onlineCount}</p>
               </div>

@@ -16,8 +16,8 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'AERO RESIN | Future Tactile Interfaces',
-  description: 'Immerse yourself in a tactile digital experience. Bridging hardware and software with fluid resin aesthetics.',
+  title: 'UrbanShopOS | Smart Commerce Management',
+  description: 'The all-in-one shop operating system. Clean, simple, and powerful management for your business.',
 }
 
 export default function RootLayout({

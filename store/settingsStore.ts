@@ -134,7 +134,7 @@ const DEFAULT_BILL: BillDesign = {
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set, get) => ({
-      siteName: 'AERO RESIN',
+      siteName: 'UrbanShopOS',
       currency: 'BDT',
       defaultTaxRate: 10,
       lowStockThreshold: 10,

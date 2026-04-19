@@ -130,7 +130,7 @@ export default function KhorochkhataView() {
 
         <ResinCard className="p-5 flex items-center justify-between group overflow-hidden" glowingColor="rgba(168,85,247,0.15)">
            <div>
-            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-purple-400 mb-1 opacity-60">Top Sink</p>
+            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-purple-400 mb-1 opacity-60">Highest Spending</p>
             <p className="text-2xl font-black text-[var(--text-primary)] uppercase tracking-tighter">{topCategory.label.split(' / ')[0]}</p>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
@@ -167,15 +167,15 @@ export default function KhorochkhataView() {
 
             <div className="flex items-center gap-3 mb-8">
               <div className="w-1.5 h-6 bg-[var(--accent)] rounded-full shadow-[0_0_10px_var(--accent)]" />
-              <h3 className="text-lg font-black tracking-tight uppercase">New Record</h3>
+              <h3 className="text-lg font-black tracking-tight uppercase">Add Expense</h3>
             </div>
 
             <form onSubmit={handleAdd} className="space-y-6">
               <div className="space-y-2">
-                <label className="text-[8px] font-black text-[var(--text-muted)] uppercase tracking-widest ml-1">Spend Purpose</label>
+                <label className="text-[8px] font-black text-[var(--text-muted)] uppercase tracking-widest ml-1">What was this for?</label>
                 <input
                   type="text"
-                  placeholder="What was this for?"
+                  placeholder="e.g. Electricity bill, Rent, etc."
                   value={description}
                   onChange={e => setDescription(e.target.value)}
                   className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-2xl py-4 px-5 text-sm font-black outline-none focus:border-[var(--accent)]/40 transition-all text-[var(--text-primary)] placeholder:text-[var(--text-muted)]/30"
@@ -229,7 +229,7 @@ export default function KhorochkhataView() {
                 disabled={!description.trim() || !amount || showSuccess}
                 className="w-full py-5 text-xs font-black uppercase tracking-[0.3em]"
               >
-                 Commit Record
+                 Save Expense
               </LiquidButton>
             </form>
           </ResinCard>
@@ -316,7 +316,7 @@ export default function KhorochkhataView() {
                    </button>
                    <button 
                     onClick={() => printReport({ 
-                      title: 'Expense Ledger', 
+                      title: 'Expense Tracker', 
                       subtitle: `Date: ${selectedDate}`,
                       data: filteredExpenses, 
                       columns: [
@@ -341,7 +341,7 @@ export default function KhorochkhataView() {
                 {filteredExpenses.length === 0 ? (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-64 flex flex-col items-center justify-center border-2 border-dashed border-[var(--card-border)] rounded-[3rem] opacity-20">
                      <Receipt size={48} className="mb-4" />
-                     <p className="text-[10px] font-black uppercase tracking-[0.4em]">Empty Ledger State</p>
+                     <p className="text-[10px] font-black uppercase tracking-[0.4em]">No expenses recorded</p>
                   </motion.div>
                 ) : (
                   filteredExpenses.map((expense, idx) => {

@@ -13,7 +13,7 @@ export interface Settings {
 
 const DEFAULT_SETTINGS: Settings = {
   id: 'default',
-  siteName: 'AERO RESIN',
+  siteName: 'UrbanShopOS',
   currency: 'USD',
   defaultTaxRate: 12,
   lowStockThreshold: 20,

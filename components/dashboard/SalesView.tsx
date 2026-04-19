@@ -156,10 +156,10 @@ export default function SalesView() {
       )}>
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 shrink-0">
           {[
-            { label: 'PoS Revenue', value: settings.formatPrice(filteredTransactions.filter(t => t.channel === 'pos').reduce((s, t) => s + t.total, 0)), icon: <Monitor size={14} />, color: 'var(--accent)' },
-            { label: 'Site Revenue', value: settings.formatPrice(filteredTransactions.filter(t => t.channel === 'online').reduce((s, t) => s + t.total, 0)), icon: <Globe size={14} />, color: 'var(--accent)' },
-            { label: 'Filtered Sales', value: settings.formatPrice(todayRev), icon: <Users size={14} />, color: 'var(--accent)' },
-            { label: 'Matches', value: filteredTransactions.length.toString(), icon: <ShoppingBag size={14} />, color: 'var(--accent)' },
+            { label: 'Shop Sales Value', value: settings.formatPrice(filteredTransactions.filter(t => t.channel === 'pos').reduce((s, t) => s + t.total, 0)), icon: <Monitor size={14} />, color: 'var(--accent)' },
+            { label: 'Online Sales Value', value: settings.formatPrice(filteredTransactions.filter(t => t.channel === 'online').reduce((s, t) => s + t.total, 0)), icon: <Globe size={14} />, color: 'var(--accent)' },
+            { label: 'Page Total', value: settings.formatPrice(todayRev), icon: <Users size={14} />, color: 'var(--accent)' },
+            { label: 'Orders Found', value: filteredTransactions.length.toString(), icon: <ShoppingBag size={14} />, color: 'var(--accent)' },
             { label: 'Avg Order', value: settings.formatPrice(avgValue), icon: <Zap size={14} />, color: 'var(--accent)' },
           ].map((stat, i) => (
              <ResinCard key={i} className="p-3" glowingColor={stat.color.startsWith('var') ? stat.color : `var(--color-${stat.color}-500)`}>
@@ -180,8 +180,8 @@ export default function SalesView() {
             <div className="flex items-center gap-1 bg-[var(--input-bg)] p-1 rounded-2xl border border-[var(--card-border)]">
                {[
                  { id: 'all', label: 'All Sales', icon: <LayoutGrid size={14} /> },
-                 { id: 'pos', label: 'Terminal / PoS', icon: <Monitor size={14} /> },
-                 { id: 'online', label: 'Store Orders', icon: <Globe size={14} /> },
+                 { id: 'pos', label: 'Shop Sales', icon: <Monitor size={14} /> },
+                 { id: 'online', label: 'Website Orders', icon: <Globe size={14} /> },
                ].map((tab) => (
                  <button
                    key={tab.id}
@@ -446,7 +446,7 @@ export default function SalesView() {
                   {(selectedOrder.deliveryAddress || selectedOrder.customerPhone) && (
                     <div className="p-5 rounded-[2rem] bg-indigo-500/5 border border-indigo-500/10 mb-6">
                       <h5 className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400 mb-4 flex items-center gap-2">
-                        <Truck size={12} /> Delivery Intelligence
+                        <Truck size={12} /> Delivery Details
                       </h5>
                       <div className="space-y-4">
                         {selectedOrder.deliveryAddress && (

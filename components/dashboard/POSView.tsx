@@ -340,7 +340,7 @@ export default function POSView() {
                 <div className="w-9 h-9 rounded-lg bg-[var(--accent)]/20 border border-[var(--accent)]/30 flex items-center justify-center text-[var(--accent)] shadow-resin">
                   <ShoppingCart size={18} />
                 </div>
-                <h2 className="text-base sm:text-lg font-black tracking-tight uppercase truncate text-[var(--text-primary)]">Point of Sale <span className="hidden sm:inline text-[var(--text-muted)] ml-2">PoS Terminal</span></h2>
+                <h2 className="text-base sm:text-lg font-black tracking-tight uppercase truncate text-[var(--text-primary)]">Checkout <span className="hidden sm:inline text-[var(--text-muted)] ml-2">Shop Terminal</span></h2>
              </div>
              <button 
                onClick={() => setShowSettings(true)}
@@ -587,7 +587,7 @@ export default function POSView() {
                  cart.length > 0 ? "bg-[var(--text-primary)] text-[var(--background)] shadow-[0_20px_40px_rgba(0,0,0,0.3)]" : "opacity-20 cursor-not-allowed text-[var(--text-muted)]"
                )}
              >
-               Proceed to Payment <ArrowRight size={18} />
+               Finalize Bill <ArrowRight size={18} />
              </LiquidButton>
           </div>
         </div>
@@ -611,7 +611,7 @@ export default function POSView() {
                      <X size={20} />
                    </button>
 
-                   <h3 className="text-xs font-black uppercase tracking-[0.4em] text-[var(--text-muted)] mb-10 text-center">How would you like to pay?</h3>
+                   <h3 className="text-xs font-black uppercase tracking-[0.4em] text-[var(--text-muted)] mb-10 text-center">Payment Method</h3>
                    
                    <div className="grid grid-cols-2 gap-3 mb-8">
                       {[
@@ -696,7 +696,7 @@ export default function POSView() {
                   onClick={resetPOS}
                   className="absolute -top-12 right-0 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-widest"
                 >
-                  Discard <X size={18} />
+                  New Order <X size={18} />
                 </button>
 
                  {/* Unified receipt — reads all design tokens from settingsStore */}

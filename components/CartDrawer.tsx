@@ -284,7 +284,7 @@ export default function CartDrawer() {
                    <h2 className="text-sm font-black uppercase tracking-widest">
                      {view === 'cart' ? 'Your Bag' : view === 'checkout' ? 'Checkout' : 'Order Secured'}
                    </h2>
-                   <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest">Aero Resin Protocol</p>
+                   <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest">UrbanShopOS Protocol</p>
                  </div>
                </div>
                <button

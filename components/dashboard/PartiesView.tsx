@@ -95,25 +95,23 @@ export default function PartiesView() {
             <p className="text-2xl font-black text-[var(--text-primary)]">{parties.length}</p>
           </div>
         </ResinCard>
-
         <ResinCard className="p-5 flex items-center gap-4" glowingColor="rgba(34,197,94,0.2)">
           <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20">
             <TrendingUp size={24} />
           </div>
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">All Deals</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">Total Sourcing</p>
             <p className="text-2xl font-black text-[var(--text-primary)]">
               {settings.formatPrice(parties.reduce((acc, p) => acc + getBalance(p.id).totalDeals, 0))}
             </p>
           </div>
         </ResinCard>
-
         <ResinCard className="p-5 flex items-center gap-4" glowingColor="rgba(244,63,94,0.2)">
           <div className="w-12 h-12 rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-400 border border-rose-500/20">
             <TrendingDown size={24} />
           </div>
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">Due Balance</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">Total Due</p>
             <p className="text-2xl font-black text-[var(--text-primary)]">
               {settings.formatPrice(parties.reduce((acc, p) => acc + getBalance(p.id).remaining, 0))}
             </p>
@@ -218,7 +216,7 @@ export default function PartiesView() {
                         onClick={() => setShowAddEntry(true)}
                         className="px-6 py-2.5 bg-[var(--text-primary)] text-[var(--background)] rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2"
                       >
-                        <Plus size={14} /> New Record
+                        <Plus size={14} /> Add Entry
                       </LiquidButton>
                       <button 
                          onClick={() => { if(confirm('Are you sure?')) { removeParty(selectedParty.id); setSelectedPartyId(null); } }}
@@ -231,7 +229,7 @@ export default function PartiesView() {
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-8 border-t border-white/5">
                     <div>
-                      <p className="text-[8px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1">Total Deals</p>
+                      <p className="text-[8px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1">Total Bills</p>
                       <p className="text-lg font-black text-[var(--text-primary)]">{settings.formatPrice(balances.totalDeals)}</p>
                     </div>
                     <div>
@@ -243,9 +241,9 @@ export default function PartiesView() {
                       <p className="text-lg font-black text-rose-400">{settings.formatPrice(balances.remaining)}</p>
                     </div>
                     <div>
-                      <p className="text-[8px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1">Last Transaction</p>
+                      <p className="text-[8px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1">Last Activity</p>
                       <p className="text-lg font-black text-[var(--text-muted)]">
-                        {selectedParty.entries[0] ? new Date(selectedParty.entries[0].date).toLocaleDateString() : 'N/A'}
+                        {selectedParty.entries[0] ? new Date(selectedParty.entries[0].date).toLocaleDateString() : 'None'}
                       </p>
                     </div>
                   </div>
@@ -430,23 +428,23 @@ export default function PartiesView() {
                   <button 
                     onClick={() => setEntryType('deal')}
                     className={cn("flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all", entryType === 'deal' ? "bg-[var(--text-primary)] text-[var(--background)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]")}
-                  >New Deal</button>
+                  >New Bill</button>
                   <button 
                     onClick={() => setEntryType('payment')}
                     className={cn("flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all", entryType === 'payment' ? "bg-[var(--text-primary)] text-[var(--background)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]")}
-                  >Payment</button>
+                  >Paid Money</button>
                 </div>
 
                 <form onSubmit={handleAddEntry} className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">Paid for? (Purpose)</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] ml-1">What did you buy? (Purpose)</label>
                     <input 
                       autoFocus
                       required
                       type="text"
                       value={entryDesc}
                       onChange={e => setEntryDesc(e.target.value)}
-                      placeholder={entryType === 'deal' ? "Supply of epoxy resin batch #4" : "Weekly settlement payment"}
+                      placeholder={entryType === 'deal' ? "Batch of new materials" : "Monthly settlement"}
                       className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-2xl p-4 text-xs font-bold outline-none focus:border-[var(--accent)]/30 transition-all text-[var(--text-primary)]"
                     />
                   </div>

@@ -225,8 +225,8 @@ export default function CouponView() {
             <ArrowLeft size={18} />
           </button>
           <div>
-            <h2 className="text-2xl md:text-3xl font-black tracking-tighter uppercase leading-none mb-1 text-[var(--text-primary)]">Offers</h2>
-            <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em]">Campaign & Coupon Hub</p>
+            <h2 className="text-2xl md:text-3xl font-black tracking-tighter uppercase leading-none mb-1 text-[var(--text-primary)]">Discounts</h2>
+            <p className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em]">Sales & Coupons</p>
           </div>
         </div>
         <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto no-scrollbar pb-2 md:pb-0">
@@ -252,14 +252,14 @@ export default function CouponView() {
             )}
             <h4 className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-6 flex items-center gap-2">
               {editingId ? <Edit2 size={14} className="text-[var(--accent)]" /> : <Scissors size={14} />} 
-              {editingId ? 'Edit Coupon' : 'New Coupon'}
+              {editingId ? 'Edit Discount' : 'New Discount'}
             </h4>
 
             <div className="space-y-5">
 
               {/* Code input */}
               <div className="space-y-1.5">
-                <label className="text-[9px] font-black text-[var(--text-muted)] uppercase ml-1">Coupon Code</label>
+                <label className="text-[9px] font-black text-[var(--text-muted)] uppercase ml-1">Code Name</label>
                 <input
                   type="text"
                   placeholder="e.g. SUMMER2026"
@@ -303,7 +303,7 @@ export default function CouponView() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <label className="text-[9px] font-black text-[var(--text-muted)] uppercase ml-1">
-                    {type === 'percent' ? 'Percent (%)' : 'Amount ($)'}
+                    {type === 'percent' ? 'Percentage (%)' : 'Money Amount ($)'}
                   </label>
                   <input
                     type="number"
@@ -316,7 +316,7 @@ export default function CouponView() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[9px] font-black text-[var(--text-muted)] uppercase ml-1">Max Uses (0=∞)</label>
+                  <label className="text-[9px] font-black text-[var(--text-muted)] uppercase ml-1">Usage Limit (0=No Limit)</label>
                   <input
                     type="number"
                     placeholder="0"
@@ -330,13 +330,13 @@ export default function CouponView() {
 
               {/* Advanced Settings Toggle */}
               <div className="border-t border-white/5 pt-4">
-                 <button 
-                   onClick={() => setShowAdvanced(!showAdvanced)}
-                   className="w-full flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
-                 >
-                   <span className="flex items-center gap-2"><Settings2 size={12} /> Advanced Setup</span>
-                   <span>{showAdvanced ? '-' : '+'}</span>
-                 </button>
+                  <button 
+                    onClick={() => setShowAdvanced(!showAdvanced)}
+                    className="w-full flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+                  >
+                    <span className="flex items-center gap-2"><Settings2 size={12} /> Optional Rules</span>
+                    <span>{showAdvanced ? '-' : '+'}</span>
+                  </button>
               </div>
 
               <AnimatePresence>
@@ -363,7 +363,7 @@ export default function CouponView() {
 
                        <div className="grid grid-cols-2 gap-3">
                          <div className="space-y-1.5">
-                            <label className="text-[9px] font-black text-[var(--text-muted)] uppercase ml-1">Min. Quantity</label>
+                            <label className="text-[9px] font-black text-[var(--text-muted)] uppercase ml-1">Min. Items</label>
                             <input 
                               type="number" 
                               placeholder="0 (None)" 
@@ -426,7 +426,7 @@ export default function CouponView() {
                 className="w-full py-4 text-[10px] font-black uppercase tracking-widest gap-2 bg-[var(--accent)] border-[var(--accent)] text-white"
               >
                 {isCreating ? <Sparkles size={14} className="animate-spin" /> : editingId ? <Edit2 size={14} /> : <Plus size={14} />}
-                {isCreating ? 'Saving...' : editingId ? 'Save Changes' : 'Create Coupon'}
+                {isCreating ? 'Saving...' : editingId ? 'Save Changes' : 'Add Discount'}
               </LiquidButton>
             </div>
           </ResinCard>

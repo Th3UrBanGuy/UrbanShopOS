@@ -36,7 +36,7 @@ export default function AboutPage() {
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">SURFACE.</span>
                 </h1>
                 <p className="text-xl text-white/60 font-light max-w-xl leading-relaxed">
-                  AERO RESIN was founded on a simple premise: Digital experiences should feel as tactile and premium as a piece of polished art.
+                  UrbanShopOS was founded on a simple premise: Business management should feel as intuitive and premium as a piece of polished art.
                 </p>
               </motion.div>
             </div>
@@ -76,7 +76,7 @@ export default function AboutPage() {
                    Through two years of R&amp;D, we developed our proprietary &quot;Fluid Resin&quot; design language—a system that brings the physics of light and material into the digital realm.
                  </p>
                  <p>
-                   Today, AERO RESIN is a global leader in high-end tech lifestyle products, bridging the gap between hardware and software with a singular, liquid aesthetic.
+                   Today, UrbanShopOS is a global leader in high-end store management solutions, bridging the gap between hardware and software with a singular, liquid aesthetic.
                  </p>
                </div>
              </div>

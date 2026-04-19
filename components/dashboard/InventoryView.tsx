@@ -69,8 +69,8 @@ export default function InventoryView() {
     const newId = Math.max(...products.map(p => p.id), 0) + 1;
     const newProduct: InventoryProduct = {
       id: newId,
-      article: `AR-${newId}-NEW`,
-      name: 'New Resin Asset',
+      article: `US-${newId}-NEW`,
+      name: 'New Product',
       price: 0,
       purchasePrice: 0,
       stock: 0,
@@ -173,13 +173,13 @@ export default function InventoryView() {
               <ArrowLeft size={18} />
             </button>
             <div>
-              <h2 className="text-2xl md:text-3xl font-black tracking-tighter uppercase leading-none mb-1 text-[var(--text-primary)]">Inventory</h2>
-              <p className="text-[9px] font-black text-[var(--text-muted)] opacity-50 uppercase tracking-[0.2em]">Stock Control Room</p>
+              <h2 className="text-2xl md:text-3xl font-black tracking-tighter uppercase leading-none mb-1 text-[var(--text-primary)]">Products & Stock</h2>
+              <p className="text-[9px] font-black text-[var(--text-muted)] opacity-50 uppercase tracking-[0.2em]">Shop Inventory</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
              <div className="flex flex-col items-end mr-3">
-                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-[var(--accent)] mb-0.5">Assets Value</span>
+                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-[var(--accent)] mb-0.5">Total Stock Value</span>
                 <span className="text-xs font-black text-[var(--text-primary)]">{settings.formatPrice(products.reduce((acc, p) => acc + (p.purchasePrice || 0) * (p.stock || 0), 0))}</span>
              </div>
              <LiquidButton onClick={handleAddNew} variant="icon" className="w-10 h-10 p-0 flex items-center justify-center">
@@ -195,7 +195,7 @@ export default function InventoryView() {
           <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
           <input 
             type="text" 
-            placeholder="Filter catalog..." 
+            placeholder="Search products..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-2xl py-3.5 pl-12 pr-4 text-sm outline-none focus:bg-[var(--card-bg)] focus:border-[var(--accent)]/30 transition-all shadow-resin"
@@ -574,12 +574,12 @@ export default function InventoryView() {
                                    <div className="space-y-2">
                                       <div className="flex items-center gap-2 text-orange-300/50">
                                         <Zap size={14} />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">Style Tags</span>
+                                        <span className="text-[10px] font-black uppercase tracking-widest">Labels (e.g. Sale, New)</span>
                                       </div>
                                       <input 
                                         disabled={!isEditing}
                                         type="text" 
-                                        placeholder="Add styles..."
+                                        placeholder="Add labels..."
                                         value={variant.styles.join(', ')} 
                                         onChange={(e) => updateVariant(vIdx, 'styles', e.target.value.split(',').map(s => s.trim()))}
                                         className="w-full bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl py-3 px-4 text-sm font-bold outline-none focus:border-orange-500/50 text-[var(--text-primary)]" 
@@ -659,7 +659,7 @@ export default function InventoryView() {
                                            </div>
                                            <div className="grid grid-cols-2 gap-2 mt-2">
                                                <div className="space-y-1">
-                                                  <span className="text-[8px] font-black text-[var(--text-muted)] uppercase opacity-50">Pairs in Stock</span>
+                                                  <span className="text-[8px] font-black text-[var(--text-muted)] uppercase opacity-50">Stock Quantity</span>
                                                   <input 
                                                     disabled={!isEditing}
                                                     type="number" 

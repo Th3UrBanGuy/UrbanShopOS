@@ -15,21 +15,21 @@ import { cn } from '@/lib/utils';
 // ── Role metadata ─────────────────────────────────────────────────────────
 const ROLE_META: Record<UserRole, { label: string; icon: React.ElementType; color: string; bg: string; description: string }> = {
   super_admin: {
-    label: 'Super Admin',
+    label: 'Owner',
     icon: Crown,
     color: '#f59e0b',
     bg: 'rgba(245,158,11,0.12)',
     description: 'Full system access. Can manage all users, roles, and settings.',
   },
   admin: {
-    label: 'Administrator',
+    label: 'Manager',
     icon: Shield,
     color: 'var(--accent)',
     bg: 'var(--accent-glow)',
     description: 'Can assign/remove module access. Cannot delete users or change passwords.',
   },
   user: {
-    label: 'Staff Member',
+    label: 'Staff',
     icon: UserIcon,
     color: '#22d3ee',
     bg: 'rgba(34,211,238,0.12)',
@@ -38,16 +38,16 @@ const ROLE_META: Record<UserRole, { label: string; icon: React.ElementType; colo
 };
 
 const MODULE_META: Record<string, { label: string; icon: React.ElementType; color: string }> = {
-  Hub: { label: 'General Hub', icon: LayoutGrid, color: 'var(--accent)' },
-  Stats: { label: 'Sales Analytics', icon: BarChart3, color: '#22d3ee' },
-  Inventory: { label: 'Stock Room', icon: Package, color: '#f59e0b' },
-  Coupons: { label: 'Offers & Coupons', icon: Ticket, color: '#ec4899' },
-  PoS: { label: 'Sales Terminal (PoS)', icon: ShoppingCart, color: '#22c55e' },
-  Khorochkhata: { label: 'Expense Ledger', icon: Wallet, color: '#a78bfa' },
-  Parties: { label: 'Partner List', icon: Users, color: '#3b82f6' },
-  Management: { label: 'Management Hub', icon: Shield, color: '#f43f5e' },
+  Hub: { label: 'General Home', icon: LayoutGrid, color: 'var(--accent)' },
+  Stats: { label: 'Sales Reports', icon: BarChart3, color: '#22d3ee' },
+  Inventory: { label: 'Products & Stock', icon: Package, color: '#f59e0b' },
+  Coupons: { label: 'Discounts', icon: Ticket, color: '#ec4899' },
+  PoS: { label: 'Shop Checkout', icon: ShoppingCart, color: '#22c55e' },
+  Khorochkhata: { label: 'Expense Tracker', icon: Wallet, color: '#a78bfa' },
+  Parties: { label: 'Suppliers & Parties', icon: Users, color: '#3b82f6' },
+  Management: { label: 'Management', icon: Shield, color: '#f43f5e' },
   Settings: { label: 'App Settings', icon: Settings, color: '#94a3b8' },
-  Users: { label: 'Staff Hub', icon: ShieldCheck, color: '#06b6d4' },
+  Users: { label: 'Staff & Access', icon: ShieldCheck, color: '#06b6d4' },
 };
 
 // ── Sub-components ────────────────────────────────────────────────────────
@@ -202,7 +202,7 @@ function UserModal({
                   type="email"
                   value={form.email}
                   onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                  placeholder="user@aeroresin.com"
+                  placeholder="user@urbanshopos.com"
                   className="w-full bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent)]/50 transition-all placeholder:text-[var(--text-muted)]"
                 />
               </div>
@@ -575,7 +575,7 @@ export default function UserManagementView() {
         <div className="mt-5 flex items-start gap-3 bg-amber-500/5 border border-amber-500/15 rounded-2xl p-4">
           <AlertTriangle size={15} className="text-amber-400 shrink-0 mt-0.5" />
           <p className="text-[11px] text-white/50">
-            As an <span className="text-amber-400 font-bold">Administrator</span>, you can manage module access for staff members, but cannot delete users or change their passwords and roles. Contact the Super Admin for those actions.
+            As a <span className="text-amber-400 font-bold">Manager</span>, you can manage module access for staff members, but cannot delete users or change their passwords and roles. Contact the Owner for those actions.
           </p>
         </div>
       )}

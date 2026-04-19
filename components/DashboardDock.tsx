@@ -8,17 +8,17 @@ import { cn } from '@/lib/utils';
 import { useDashboardStore, DashboardTab } from '@/store/dashboardStore';
 import { useAuthStore } from '@/store/authStore';
 
-const DOCK_ITEMS: { icon: React.ReactNode; label: DashboardTab }[] = [
-  { icon: <LayoutGrid size={20} />, label: "Hub" },
-  { icon: <ShoppingCart size={20} />, label: "PoS" },
-  { icon: <BarChart3 size={20} />, label: "Stats" },
-  { icon: <Wallet size={20} />, label: "Khorochkhata" },
-  { icon: <Layers size={20} />, label: "Management" },
+const DOCK_ITEMS: { icon: React.ReactNode; label: DashboardTab; display: string }[] = [
+  { icon: <LayoutGrid size={20} />, label: "Hub", display: "Home" },
+  { icon: <ShoppingCart size={20} />, label: "PoS", display: "Sell" },
+  { icon: <BarChart3 size={20} />, label: "Stats", display: "Reports" },
+  { icon: <Wallet size={20} />, label: "Khorochkhata", display: "Expenses" },
+  { icon: <Layers size={20} />, label: "Management", display: "Manage" },
 ];
 
-function DockIcon({ children, label, active, onClick, mouseX, isCompact, isMobile }: { 
+function DockIcon({ children, display, active, onClick, mouseX, isCompact, isMobile }: { 
   children: React.ReactNode; 
-  label: DashboardTab;
+  display: string;
   active: boolean;
   onClick: () => void;
   mouseX: MotionValue<number>;
@@ -32,8 +32,8 @@ function DockIcon({ children, label, active, onClick, mouseX, isCompact, isMobil
     return val - bounds.x - bounds.width / 2;
   });
 
-  const baseWidth = isMobile ? 48 : 48; // Significantly larger on mobile (matching desktop base)
-  const hoverWidth = isMobile ? 64 : 72;
+  const baseWidth = isMobile ? 54 : 48; // Slightly wider for labels
+  const hoverWidth = isMobile ? 54 : 72;
   const compactWidth = isMobile ? 42 : 40;
 
   const widthSync = useTransform(distance, [-150, 0, 150], [isCompact ? compactWidth : baseWidth, isCompact ? baseWidth : hoverWidth, isCompact ? compactWidth : baseWidth]);
@@ -55,8 +55,11 @@ function DockIcon({ children, label, active, onClick, mouseX, isCompact, isMobil
           : "bg-[var(--card-bg)] border-[var(--card-border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] shadow-sm"
       )}
     >
-      <motion.div style={{ scale }} className="relative z-10 flex items-center justify-center">
+      <motion.div style={{ scale }} className="relative z-10 flex flex-col items-center justify-center">
         {children}
+        {isMobile && !isCompact && (
+          <span className="text-[7px] font-black uppercase tracking-tighter mt-1 opacity-80">{display}</span>
+        )}
       </motion.div>
 
       {active && (
@@ -72,7 +75,7 @@ function DockIcon({ children, label, active, onClick, mouseX, isCompact, isMobil
       
       {!isMobile && (
         <div className="absolute -top-14 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-[var(--foreground)] backdrop-blur-2xl border border-[var(--card-border)] rounded-xl text-[10px] font-black uppercase tracking-[0.15em] text-[var(--background)] opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap translate-y-2 group-hover:translate-y-0 shadow-2xl">
-          {label}
+          {display}
           <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[var(--foreground)] border-r border-b border-[var(--card-border)] rotate-45" />
         </div>
       )}
@@ -156,7 +159,7 @@ export default function DashboardDock() {
               className="flex items-center"
             >
               <DockIcon 
-                label="Hub"
+                display="Home"
                 active={false}
                 onClick={() => setActiveTab('Hub')}
                 mouseX={mouseX}
@@ -177,7 +180,7 @@ export default function DashboardDock() {
               {visibleItems.map((item, i) => (
                 <DockIcon 
                   key={i} 
-                  label={item.label}
+                  display={item.display}
                   active={activeTab === item.label}
                   onClick={() => setActiveTab(item.label)}
                   mouseX={mouseX}
