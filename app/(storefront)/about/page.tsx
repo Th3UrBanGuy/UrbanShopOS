@@ -8,10 +8,17 @@ import LiquidButton from '@/components/LiquidButton';
 import Link from 'next/link';
 
 const VALUES = [
-  { icon: <Zap className="text-indigo-400" />, title: "Precision Crafted", desc: "Every pixel and physical detail is honed for tactile perfection." },
-  { icon: <Shield className="text-purple-400" />, title: "Resilient Design", desc: "Materials and interfaces built to withstand the test of time." },
-  { icon: <Sparkles className="text-pink-400" />, title: "Future Aesthetic", desc: "Pushing the boundaries of light, reflection, and digital material." },
-  { icon: <Globe className="text-blue-400" />, title: "Global Vision", desc: "Connecting the world through shared high-end design languages." }
+  { icon: <Zap className="text-indigo-400" />, title: "Integrity", desc: "Honest, transparent mechanisms at the core of every solution." },
+  { icon: <Cpu className="text-purple-400" />, title: "Precision", desc: "Minute attention to detail in both physical robotics and digital code." },
+  { icon: <Sparkles className="text-pink-400" />, title: "Evolution", desc: "Continuously dismantling limitations to reach the next stage." },
+  { icon: <Shield className="text-blue-400" />, title: "Security", desc: "AES-256 grade encryption protecting the substrate of your business." }
+];
+
+const TEAM = [
+  { name: "Kazi Ahammad Ullah", role: "Chief Executive Officer", focus: "Vision & Strategic Leadership" },
+  { name: "Alahi Majnur Osama", role: "Chief Operating Officer", focus: "Operations & Execution" },
+  { name: "Tajwar Saiyeed Abid", role: "Chief Technology Officer", focus: "Product Innovation & Tech" },
+  { name: "MD. Tahmidul Alam Ahad", role: "Chief Marketing Officer", focus: "Brand & Growth Strategy" }
 ];
 
 export default function AboutPage() {
@@ -29,14 +36,14 @@ export default function AboutPage() {
               >
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8 text-[10px] font-bold uppercase tracking-widest text-indigo-400">
                   <Cpu size={14} />
-                  <span>Established 2026</span>
+                  <span>Founded 2025 • Chattogram</span>
                 </div>
                 <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-8 leading-[0.9]">
-                  BEYOND THE <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">SURFACE.</span>
+                  ARCHITECTING THE <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">SUBSTRATE.</span>
                 </h1>
                 <p className="text-xl text-white/60 font-light max-w-xl leading-relaxed">
-                  UrbanShopOS was founded on a simple premise: Business management should feel as intuitive and premium as a piece of polished art.
+                  UrbanShopOS is a convergence of specialized intelligence, unifying software, security, and robotics into a singular, evolutionary force.
                 </p>
               </motion.div>
             </div>
@@ -51,35 +58,74 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Our Story */}
+        {/* Why UrbanShopOS */}
         <section className="mb-32">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
              <div className="order-2 md:order-1">
                <div className="grid grid-cols-2 gap-4">
                  <div className="space-y-4">
-                   <div className="h-64 rounded-3xl bg-white/5 border border-white/10 shadow-resin" />
-                   <div className="h-48 rounded-3xl bg-indigo-500/10 border border-white/10 shadow-resin" />
+                   <ResinCard className="h-64 flex flex-col items-center justify-center p-6 text-center">
+                      <Zap className="text-indigo-400 mb-4" size={32} />
+                      <h4 className="text-xs font-black uppercase tracking-widest mb-2">Software Mechanism</h4>
+                      <p className="text-[10px] text-white/30 font-bold uppercase leading-tight">Autonomous Sales & Inventory Algorithms</p>
+                   </ResinCard>
+                   <ResinCard className="h-48 flex flex-col items-center justify-center p-6 text-center" glowingColor="rgba(236, 72, 153, 0.1)">
+                      <Cpu className="text-pink-400 mb-4" size={32} />
+                      <h4 className="text-xs font-black uppercase tracking-widest mb-2">Robotics & IOT</h4>
+                      <p className="text-[10px] text-white/30 font-bold uppercase leading-tight">Physical Fulfillment Synchronization</p>
+                   </ResinCard>
                  </div>
                  <div className="space-y-4 pt-8">
-                   <div className="h-48 rounded-3xl bg-purple-500/10 border border-white/10 shadow-resin" />
-                   <div className="h-64 rounded-3xl bg-white/5 border border-white/10 shadow-resin" />
+                   <ResinCard className="h-48 flex flex-col items-center justify-center p-6 text-center" glowingColor="rgba(168, 85, 247, 0.1)">
+                      <Shield className="text-purple-400 mb-4" size={32} />
+                      <h4 className="text-xs font-black uppercase tracking-widest mb-2">Vault Security</h4>
+                      <p className="text-[10px] text-white/30 font-bold uppercase leading-tight">End-to-End Encryption Protocol</p>
+                   </ResinCard>
+                   <ResinCard className="h-64 flex flex-col items-center justify-center p-6 text-center">
+                      <Sparkles className="text-indigo-400 mb-4" size={32} />
+                      <h4 className="text-xs font-black uppercase tracking-widest mb-2">Fluid Aesthetic</h4>
+                      <p className="text-[10px] text-white/30 font-bold uppercase leading-tight">Interactive Resin-Finish Interfaces</p>
+                   </ResinCard>
                  </div>
                </div>
              </div>
              <div className="order-1 md:order-2">
-               <h2 className="text-3xl font-bold mb-6 tracking-tight">Our Story</h2>
+               <h2 className="text-3xl md:text-5xl font-black mb-6 tracking-tighter uppercase">The Convergence</h2>
                <div className="space-y-6 text-white/50 leading-relaxed font-light">
                  <p>
-                   We started as a small group of industrial designers and software engineers who were tired of the &quot;flat&quot; web. We missed the depth, the reflections, and the weight of physical objects.
+                   We built UrbanShopOS to dismantle the limitations of current business infrastructure. For too long, software has been disconnected from the physical reality of retail and robotics.
                  </p>
                  <p>
-                   Through two years of R&amp;D, we developed our proprietary &quot;Fluid Resin&quot; design language—a system that brings the physics of light and material into the digital realm.
+                   Tectonic operates at the intersection of imagination and engineering. We've combined high-precision software mechanisms with robotics and IOT to create a singular, integrated ecosystem.
                  </p>
                  <p>
-                   Today, UrbanShopOS is a global leader in high-end store management solutions, bridging the gap between hardware and software with a singular, liquid aesthetic.
+                   UrbanShopOS is not just a tool; it is a substrate designed to scale, protect, and evolve alongside your business vision.
                  </p>
                </div>
              </div>
+          </div>
+        </section>
+
+        {/* The Architects (Team) */}
+        <section className="mb-32">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-5xl font-black mb-4 tracking-tighter uppercase">The Architects</h2>
+            <p className="text-white/50 font-light text-lg">Operating at the intersection of specialized intelligence.</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {TEAM.map((member, i) => (
+              <ResinCard key={i} className="p-8 group hover:scale-[1.02] transition-all duration-500 overflow-hidden relative" glowingColor="rgba(99, 102, 241, 0.1)">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-indigo-500/10 transition-colors" />
+                <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-8 shadow-resin group-hover:border-indigo-500/30 transition-all">
+                  <div className="text-xl font-black text-white/10 group-hover:text-indigo-400/50 transition-colors">{member.name.split(' ').map(n => n[0]).join('')}</div>
+                </div>
+                <h3 className="text-lg font-bold mb-1 uppercase tracking-tight group-hover:text-indigo-400 transition-colors">{member.name}</h3>
+                <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-6">{member.role}</p>
+                <div className="pt-6 border-t border-white/5">
+                  <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest">{member.focus}</p>
+                </div>
+              </ResinCard>
+            ))}
           </div>
         </section>
 

@@ -14,9 +14,9 @@ export interface Settings {
 const DEFAULT_SETTINGS: Settings = {
   id: 'default',
   siteName: 'UrbanShopOS',
-  currency: 'USD',
-  defaultTaxRate: 12,
-  lowStockThreshold: 20,
+  currency: 'BDT',
+  defaultTaxRate: 10,
+  lowStockThreshold: 10,
   billDesign: {},
   updatedAt: new Date().toISOString(),
 };

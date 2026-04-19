@@ -14,7 +14,11 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
   useEffect(() => {
     if (!mounted) return;
     
-    // Apply theme
+    // Apply theme classes
+    document.documentElement.classList.remove('dark', 'light');
+    document.documentElement.classList.add(theme);
+    
+    // Set attribute as fallback or for other selectors
     document.documentElement.setAttribute('data-theme', theme);
     
     // Apply compact mode

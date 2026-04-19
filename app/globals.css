@@ -1,38 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  /* Default: Lite Mode (Resin Clear - Light Teal/Blue) */
-  --background: #f0fdfa; /* Soft teal-blue tint */
-  --foreground: #0f172a;
-  --resin-base: rgba(13, 148, 136, 0.03);
-  --resin-highlight: rgba(13, 148, 136, 0.05);
-  --resin-shadow: rgba(15, 23, 42, 0.04);
-  --card-bg: #ffffff;
-  --card-border: rgba(13, 148, 136, 0.12);
-  --glass-bg: rgba(255, 255, 255, 0.9);
-  
-  --accent: #0d9488; /* Teal Accent for Lite */
-  --accent-glow: rgba(13, 148, 136, 0.1);
-  --text-primary: #0f172a;
-  --text-muted: #475569;
-  --text-dim: #94a3b8;
-  --input-bg: #f8fafc;
-
-  --bg-gradient-1: rgba(13, 148, 136, 0.05);
-  --bg-gradient-2: rgba(30, 64, 175, 0.03);
-
-  --spacing-base: 1.5rem;
-  --spacing-gap: 1.5rem;
-  --radius-base: 1.5rem;
-
-  /* Resin Shadows (Lite) */
-  --shadow-resin: 0 8px 32px 0 rgba(15, 23, 42, 0.08), inset 0 1px 2px 0 rgba(255, 255, 255, 0.5);
-  --shadow-resin-hover: 0 12px 48px 0 rgba(15, 23, 42, 0.12), inset 0 1px 3px 0 rgba(255, 255, 255, 0.7);
-  --shadow-resin-pressed: 0 4px 16px 0 rgba(15, 23, 42, 0.05), inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
-}
-
-.dark {
-  /* HUD Aesthetic (Deep Navy Dark Theme) */
+  /* Default: Dark HUD Aesthetic (Deep Navy Dark Theme) */
   --background: #020617; /* Slate Black */
   --foreground: #f8fafc;
   --resin-base: rgba(255, 255, 255, 0.03);
@@ -52,10 +21,41 @@
   --bg-gradient-1: rgba(56, 189, 248, 0.12);
   --bg-gradient-2: rgba(13, 148, 136, 0.1);
 
+  --spacing-base: 1.5rem;
+  --spacing-gap: 1.5rem;
+  --radius-base: 1.5rem;
+
   /* Resin Shadows (Dark) */
   --shadow-resin: 0 8px 32px 0 rgba(0, 0, 0, 0.6), inset 0 1px 2px 0 rgba(255, 255, 255, 0.05);
   --shadow-resin-hover: 0 12px 48px 0 rgba(0, 0, 0, 0.8), inset 0 1px 3px 0 rgba(255, 255, 255, 0.1);
   --shadow-resin-pressed: 0 4px 16px 0 rgba(0, 0, 0, 0.4), inset 0 2px 4px 0 rgba(0, 0, 0, 0.6);
+}
+
+.light {
+  /* Lite Mode (Resin Clear - Light Teal/Blue) */
+  --background: #f0fdfa; /* Soft teal-blue tint */
+  --foreground: #0f172a;
+  --resin-base: rgba(13, 148, 136, 0.03);
+  --resin-highlight: rgba(13, 148, 136, 0.05);
+  --resin-shadow: rgba(15, 23, 42, 0.04);
+  --card-bg: #ffffff;
+  --card-border: rgba(13, 148, 136, 0.12);
+  --glass-bg: rgba(255, 255, 255, 0.9);
+  
+  --accent: #0d9488; /* Teal Accent for Lite */
+  --accent-glow: rgba(13, 148, 136, 0.1);
+  --text-primary: #0f172a;
+  --text-muted: #475569;
+  --text-dim: #94a3b8;
+  --input-bg: #f8fafc;
+
+  --bg-gradient-1: rgba(13, 148, 136, 0.05);
+  --bg-gradient-2: rgba(30, 64, 175, 0.03);
+
+  /* Resin Shadows (Lite) */
+  --shadow-resin: 0 8px 32px 0 rgba(15, 23, 42, 0.08), inset 0 1px 2px 0 rgba(255, 255, 255, 0.5);
+  --shadow-resin-hover: 0 12px 48px 0 rgba(15, 23, 42, 0.12), inset 0 1px 3px 0 rgba(255, 255, 255, 0.7);
+  --shadow-resin-pressed: 0 4px 16px 0 rgba(15, 23, 42, 0.05), inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
 }
 
 .compact {

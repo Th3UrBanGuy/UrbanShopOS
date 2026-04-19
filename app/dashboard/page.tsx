@@ -133,12 +133,6 @@ export default function DashboardPage() {
               <div className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-[var(--background)]" />
             </LiquidButton>
             <AdminProfileMenu />
-            <motion.button 
-              whileTap={{ scale: 0.9 }}
-              className="md:hidden w-9 h-9 flex items-center justify-center bg-[var(--input-bg)] rounded-xl border border-[var(--card-border)] text-[var(--text-primary)]"
-            >
-              <Menu size={18} />
-            </motion.button>
           </div>
         </div>
       </header>

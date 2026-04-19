@@ -268,10 +268,10 @@ export default function SettingsView() {
                               onChange={e => settings.setCurrency(e.target.value)}
                               className="flex-1 bg-[var(--input-bg)] border border-[var(--card-border)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-primary)] font-medium outline-none focus:border-[var(--accent)]/5 focus:bg-[var(--card-bg)] transition-all appearance-none"
                             >
+                              <option value="BDT">BDT (৳)</option>
                               <option value="USD">USD ($)</option>
                               <option value="EUR">EUR (€)</option>
                               <option value="GBP">GBP (£)</option>
-                              <option value="BDT">BDT (৳)</option>
                             </select>
                             <button
                               onClick={async () => {

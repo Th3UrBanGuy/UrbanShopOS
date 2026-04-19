@@ -15,13 +15,16 @@ import {
   CreditCard,
   Building2,
   UserPlus,
-  Check
+  Check,
+  Printer,
+  Download
 } from 'lucide-react';
 import { usePartyStore } from '@/store/partyStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { cn } from '@/lib/utils';
 import ResinCard from '@/components/ResinCard';
 import LiquidButton from '@/components/LiquidButton';
+import PartyReportDocument from './PartyReportDocument';
 
 export default function PartiesView() {
   const { parties, addParty, removeParty, addEntry, removeEntry, getBalance } = usePartyStore();
@@ -32,6 +35,7 @@ export default function PartiesView() {
   const [showAddParty, setShowAddParty] = useState(false);
   const [showAddEntry, setShowAddEntry] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [isPrinting, setIsPrinting] = useState(false);
 
   // Form states
   const [partyName, setPartyName] = useState('');
@@ -212,6 +216,12 @@ export default function PartiesView() {
                     </div>
 
                     <div className="flex items-center gap-3">
+                      <LiquidButton 
+                        onClick={() => setIsPrinting(true)}
+                        className="px-4 py-2.5 bg-white/5 border border-white/10 text-[var(--text-primary)] rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-white/10"
+                      >
+                        <Printer size={14} /> Report
+                      </LiquidButton>
                       <LiquidButton 
                         onClick={() => setShowAddEntry(true)}
                         className="px-6 py-2.5 bg-[var(--text-primary)] text-[var(--background)] rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2"
@@ -482,6 +492,17 @@ export default function PartiesView() {
                 </form>
               </ResinCard>
             </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+      {/* Report Modal */}
+      <AnimatePresence>
+        {isPrinting && selectedParty && (
+          <div className="fixed inset-0 z-[300] bg-white overflow-y-auto no-scrollbar">
+            <PartyReportDocument 
+              party={selectedParty} 
+              onClose={() => setIsPrinting(false)} 
+            />
           </div>
         )}
       </AnimatePresence>

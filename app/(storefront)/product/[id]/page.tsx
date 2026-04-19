@@ -14,7 +14,7 @@ import {
   Check,
   CircleDot
 } from 'lucide-react';
-import { useInventoryStore } from '@/store/inventoryStore';
+import { useInventoryStore, getProductDisplayImage } from '@/store/inventoryStore';
 import { useCartStore } from '@/store/cartStore';
 import ResinCard from '@/components/ResinCard';
 import LiquidButton from '@/components/LiquidButton';
@@ -127,9 +127,9 @@ export default function ProductDetailPage() {
                       transition={{ duration: 0.5 }}
                       className="w-full h-full flex items-center justify-center p-12"
                     >
-                       {(selectedVariant?.image || product.image) ? (
+                       {(selectedVariant ? (selectedVariant.image || product.image) : getProductDisplayImage(product)) ? (
                          <Image 
-                           src={(selectedVariant?.image || product.image) as string} 
+                           src={(selectedVariant ? (selectedVariant.image || product.image) : getProductDisplayImage(product)) as string} 
                            alt={product.name} 
                            width={800}
                            height={1000}

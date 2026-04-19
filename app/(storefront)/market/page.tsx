@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ShoppingBag, Star, ArrowRight } from 'lucide-react';
 import ResinCard from '@/components/ResinCard';
 import LiquidButton from '@/components/LiquidButton';
-import { useInventoryStore } from '@/store/inventoryStore';
+import { useInventoryStore, getProductDisplayImage } from '@/store/inventoryStore';
 import { useCartStore } from '@/store/cartStore';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -34,7 +34,7 @@ export default function MarketPage() {
       article: product.article,
       price: product.price,
       tax: product.tax,
-      image: product.image
+      image: getProductDisplayImage(product)
     });
   };
 
@@ -114,10 +114,10 @@ export default function MarketPage() {
                     <div className="p-6 flex flex-col h-full group">
                       <div className="aspect-square rounded-2xl bg-[var(--background)] border border-white/5 mb-6 flex items-center justify-center relative overflow-hidden shadow-inner">
                         <div className="absolute inset-0 z-0">
-                          {product.image ? (
+                          {getProductDisplayImage(product) ? (
                             <motion.img 
                               whileHover={{ scale: 1.1 }}
-                              src={product.image} 
+                              src={getProductDisplayImage(product)} 
                               alt={product.name} 
                               className="w-full h-full object-cover transition-transform duration-700 opacity-60 group-hover:opacity-100"
                             />

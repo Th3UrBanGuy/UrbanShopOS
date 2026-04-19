@@ -7,7 +7,7 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, Wallet
 import ResinCard from '@/components/ResinCard';
 import LiquidButton from '@/components/LiquidButton';
 import { cn } from '@/lib/utils';
-import { useInventoryStore, InventoryProduct } from '@/store/inventoryStore';
+import { useInventoryStore, InventoryProduct, getProductDisplayImage } from '@/store/inventoryStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useSalesStore } from '@/store/salesStore';
 import { useCouponStore, Coupon } from '@/store/couponStore';
@@ -371,10 +371,10 @@ export default function POSView() {
                     glowingColor="rgba(30,58,138,0.1)"
                   >
                     <div className="aspect-square rounded-xl bg-[var(--background)] border border-[var(--card-border)] mb-3 flex items-center justify-center relative overflow-hidden shrink-0 group-hover:shadow-[0_0_30px_var(--accent-glow)] transition-all duration-500">
-                      {p.image ? (
+                      {getProductDisplayImage(p) ? (
                         <motion.div whileHover={{ scale: 1.1 }} className="w-full h-full relative">
                           <Image 
-                            src={p.image} 
+                            src={getProductDisplayImage(p)!} 
                             alt={p.name} 
                             fill
                             className="object-cover transition-transform duration-700"

@@ -151,7 +151,21 @@ export const useSettingsStore = create<SettingsState>()(
       setLowStockThreshold: (lowStockThreshold) => set({ lowStockThreshold }),
       setBillDesign: (design: Partial<BillDesign>) => set((state) => ({ billDesign: { ...state.billDesign, ...design } })),
       resetBillDesign: () => set({ billDesign: DEFAULT_BILL }),
-      updateExchangeRates: (rates: Record<string, number>) => set({ exchangeRates: rates }),
+      updateExchangeRates: (rates: Record<string, number>) => {
+        // If BDT exists in the incoming rates (which are usually USD-based),
+        // we normalize everything so BDT becomes the base (1.0)
+        if (rates.BDT) {
+          const bdtRate = rates.BDT;
+          const normalizedRates: Record<string, number> = {};
+          Object.keys(rates).forEach(key => {
+            normalizedRates[key] = rates[key] / bdtRate;
+          });
+          set({ exchangeRates: normalizedRates });
+        } else {
+          // Fallback to simple set if BDT is missing (unlikely)
+          set({ exchangeRates: rates });
+        }
+      },
       formatPrice: (amount: number) => {
         const { currency, exchangeRates } = get();
         const rate = exchangeRates[currency] || 1;

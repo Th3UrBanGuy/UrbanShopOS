@@ -41,6 +41,18 @@ export interface InventoryProduct {
   variants: ColorVariant[];
 }
 
+/**
+ * Helper to get the primary display image for a product based on variant count.
+ * - 1 Variant or 0: Use product.image
+ * - Multiple Variants: Use product.variants[0].image
+ */
+export const getProductDisplayImage = (product: InventoryProduct) => {
+  if (product.variants && product.variants.length > 1) {
+    return product.variants[0].image || product.image;
+  }
+  return product.image || (product.variants && product.variants.length > 0 ? product.variants[0].image : undefined);
+};
+
 const INITIAL_PRODUCTS: InventoryProduct[] = [
   { 
     id: 1, 

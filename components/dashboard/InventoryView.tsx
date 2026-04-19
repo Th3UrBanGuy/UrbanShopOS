@@ -10,7 +10,7 @@ import {
 import ResinCard from '@/components/ResinCard';
 import LiquidButton from '@/components/LiquidButton';
 import { cn } from '@/lib/utils';
-import { useInventoryStore, InventoryProduct, ColorVariant } from '@/store/inventoryStore';
+import { useInventoryStore, InventoryProduct, ColorVariant, getProductDisplayImage } from '@/store/inventoryStore';
 import { useDashboardStore } from '@/store/dashboardStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useToastStore } from '@/store/toastStore';
@@ -335,12 +335,12 @@ export default function InventoryView() {
                     {/* Image Preview */}
                     <div className="w-full sm:w-40 aspect-square rounded-[2rem] bg-[var(--card-bg)] border border-[var(--card-border)] flex flex-col items-center justify-center relative overflow-hidden group shrink-0">
                       <AnimatePresence mode="wait">
-                        {editForm.image ? (
+                        {getProductDisplayImage(editForm) ? (
                           <motion.img 
-                            key={editForm.image}
+                            key={getProductDisplayImage(editForm)}
                             initial={{ opacity: 0, scale: 1.2 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            src={editForm.image} 
+                            src={getProductDisplayImage(editForm)} 
                             alt={editForm.name} 
                             className="w-full h-full object-cover" 
                           />
