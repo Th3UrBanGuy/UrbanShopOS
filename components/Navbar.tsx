@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Menu, X, ShieldAlert, Unlock, Package, ChevronRight, SearchIcon, Sparkles, Truck, MapPin, Phone, Calendar, Activity, ShieldCheck, Box } from 'lucide-react';
+import { ShoppingBag, Menu, X, ShieldAlert, Unlock, Package, ChevronRight, SearchIcon, Sparkles } from 'lucide-react';
 import LiquidButton from '@/components/LiquidButton';
 import { useCartStore } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
@@ -32,7 +32,7 @@ export default function Navbar() {
   // Auth & Search state
   const {} = useAuthStore();
   const { transactions } = useSalesStore();
-  const settings = useSettingsStore();
+  useSettingsStore();
   const [searchId, setSearchId] = useState('');
   const [foundOrder, setFoundOrder] = useState<SaleTransaction | null>(null);
   const [isSearching, setIsSearching] = useState(false);

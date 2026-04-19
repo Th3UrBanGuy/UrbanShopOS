@@ -277,12 +277,20 @@ export default function POSView() {
         subject: `Receipt from ${settings.siteName}`,
         storeName: settings.siteName,
         receiptDetails: {
-          items: cart.map(i => ({ name: i.name, price: settings.getConvertedAmount(i.price * i.quantity) })),
+          items: cart.map(i => ({ 
+            name: i.name, 
+            price: settings.getConvertedAmount(i.price),
+            quantity: i.quantity,
+            total: settings.getConvertedAmount(i.price * i.quantity),
+            article: i.article,
+            variant: i.selectedVariant ? `${i.selectedVariant.color} / ${i.selectedVariant.size}` : undefined
+          })),
           tax: settings.getConvertedAmount(totalTax),
           discount: settings.getConvertedAmount(discountAmount),
           total: settings.getConvertedAmount(total),
           txnId: transactionId,
           paymentMethod: paymentMethod || 'N/A',
+          channel: 'pos',
           currency: settings.currency === 'BDT' ? '৳' : settings.currency === 'EUR' ? '€' : settings.currency === 'GBP' ? '£' : '$'
         }
       };

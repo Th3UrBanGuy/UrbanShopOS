@@ -211,12 +211,22 @@ export default function CartDrawer() {
         subject: `Receipt from ${settings.siteName}`,
         storeName: settings.siteName,
         receiptDetails: {
-          items: items.map(i => ({ name: i.name, price: settings.getConvertedAmount(i.price * i.quantity) })),
+          items: items.map(i => ({ 
+            name: i.name, 
+            price: settings.getConvertedAmount(i.price),
+            quantity: i.quantity,
+            total: settings.getConvertedAmount(i.price * i.quantity),
+            article: i.article,
+            variant: i.selectedVariant ? `${i.selectedVariant.color} / ${i.selectedVariant.size}` : undefined
+          })),
           tax: settings.getConvertedAmount(taxTotal),
           discount: settings.getConvertedAmount(discountAmount),
           total: settings.getConvertedAmount(total),
           txnId: transactionId,
           paymentMethod: paymentMethod || 'Online Payment',
+          channel: 'online',
+          customerName: customerName || undefined,
+          deliveryAddress: deliveryAddress ? `${deliveryAddress}, ${deliveryCity}` : undefined,
           currency: settings.currency === 'BDT' ? '৳' : settings.currency === 'EUR' ? '€' : settings.currency === 'GBP' ? '£' : '$'
         }
       };

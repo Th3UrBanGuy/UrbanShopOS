@@ -5,19 +5,13 @@ import { SaleTransaction } from '@/types';
 import { useSettingsStore } from '@/store/settingsStore';
 import { cn } from '@/lib/utils';
 import { 
-  Box, 
   Truck, 
   MapPin, 
-  ShieldCheck, 
-  Calendar, 
-  Activity, 
   QrCode, 
   Lock, 
   Printer, 
   X, 
-  Download,
   Phone,
-  Zap,
   CheckCircle2
 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -226,7 +220,7 @@ export default function TrackingReport({ order, onClose }: TrackingReportProps) 
                   <b>Status Assurance:</b> This report reflects the current real-time state of the transaction within the UrbanShopOS ecosystem.
                 </p>
                 <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                  {new Date().toISOString()} // STATUS SNAPSHOT
+                  {new Date().toISOString()} {/* STATUS SNAPSHOT */}
                 </p>
               </div>
             </div>

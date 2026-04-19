@@ -21,59 +21,278 @@ export async function POST(req: Request) {
     });
 
     // Create a slick HTML receipt
+    const {
+      items = [],
+      tax = 0,
+      discount = 0,
+      total = 0,
+      txnId = 'N/A',
+      paymentMethod = 'N/A',
+      channel = 'pos',
+      currency = '$',
+      customerName,
+      deliveryAddress
+    } = receiptDetails || {};
+
+    const brandColor = '#1e3a8a'; // Aero Navy
+    const accentColor = '#6366f1'; // Indigo
+
     const htmlReceipt = `
-      <div style="font-family: monospace; max-width: 400px; margin: 0 auto; padding: 20px; background: #fff; border: 1px solid #ccc; border-radius: 8px;">
-        <div style="text-align: center; margin-bottom: 20px;">
-          <h1 style="margin: 0; font-size: 24px; font-weight: 900;">${storeName || 'UrbanShopOS'}</h1>
-          <p style="margin: 5px 0; color: #666; font-size: 14px;">DIGITAL RECEIPT</p>
-        </div>
-        
-        <div style="border-top: 1px dashed #ccc; border-bottom: 1px dashed #ccc; padding: 15px 0; margin-bottom: 15px;">
-          <table style="width: 100%; border-collapse: collapse;">
-            <tbody>
-              ${receiptDetails?.items?.map((item: { name: string; price: number }) => `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Digital Receipt - ${storeName || 'UrbanShopOS'}</title>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Space+Grotesk:wght@300;700&display=swap');
+          
+          body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7fa;
+            color: #1a1a1a;
+          }
+          .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+          }
+          .header {
+            background-color: #0c0c14;
+            padding: 40px 30px;
+            text-align: center;
+            color: #ffffff;
+          }
+          .header h1 {
+            margin: 0;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+          }
+          .header p {
+            margin: 5px 0 0;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.4em;
+            color: ${accentColor};
+            text-transform: uppercase;
+          }
+          .content {
+            padding: 30px;
+          }
+          .meta-grid {
+            width: 100%;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #edf2f7;
+            padding-bottom: 20px;
+          }
+          .meta-item {
+            padding: 10px 0;
+          }
+          .meta-label {
+            font-size: 9px;
+            font-weight: 800;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 2px;
+          }
+          .meta-value {
+            font-size: 13px;
+            font-weight: 700;
+            color: #1a202c;
+          }
+          .address-box {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border-left: 4px solid ${brandColor};
+          }
+          .item-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+          }
+          .item-table th {
+            text-align: left;
+            font-size: 10px;
+            font-weight: 800;
+            color: #a0aec0;
+            text-transform: uppercase;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #edf2f7;
+          }
+          .item-row td {
+            padding: 15px 0;
+            border-bottom: 1px solid #f7fafc;
+          }
+          .item-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #2d3748;
+          }
+          .item-variant {
+            font-size: 10px;
+            font-weight: 700;
+            color: ${accentColor};
+            text-transform: uppercase;
+            margin-top: 2px;
+          }
+          .item-article {
+            font-size: 9px;
+            color: #a0aec0;
+          }
+          .summary-table {
+            width: 100%;
+            margin-top: 20px;
+          }
+          .summary-row td {
+            padding: 4px 0;
+            font-size: 13px;
+            font-weight: 600;
+            color: #4a5568;
+          }
+          .total-row td {
+            padding: 20px 0 0;
+            font-size: 24px;
+            font-weight: 900;
+            color: #1a1a1a;
+          }
+          .footer {
+            padding: 30px;
+            background: #f8fafc;
+            text-align: center;
+            border-top: 1px solid #edf2f7;
+          }
+          .security-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #e2e8f0;
+            border-radius: 20px;
+            font-size: 9px;
+            font-weight: 800;
+            color: #4a5568;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 15px;
+          }
+          .footer-note {
+            font-size: 11px;
+            color: #a0aec0;
+            line-height: 1.6;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>${storeName || 'UrbanShopOS'}</h1>
+            <p>Digital Transaction Manifest</p>
+          </div>
+          
+          <div class="content">
+            <table class="meta-grid">
+              <tr>
+                <td class="meta-item">
+                  <div class="meta-label">ID #Manifest</div>
+                  <div class="meta-value">${txnId}</div>
+                </td>
+                <td class="meta-item" style="text-align: right;">
+                  <div class="meta-label">Channel</div>
+                  <div class="meta-value" style="color: ${accentColor};">${channel.toUpperCase()}</div>
+                </td>
+              </tr>
+              <tr>
+                <td class="meta-item">
+                  <div class="meta-label">Issued On</div>
+                  <div class="meta-value">${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
+                </td>
+                <td class="meta-item" style="text-align: right;">
+                  <div class="meta-label">Authorization</div>
+                  <div class="meta-value">${paymentMethod.toUpperCase()}</div>
+                </td>
+              </tr>
+            </table>
+
+            ${customerName || deliveryAddress ? `
+              <div class="address-box">
+                <div class="meta-label">Delivery Protocol</div>
+                <div class="meta-value" style="margin-top: 5px;">
+                  ${customerName ? `<strong>${customerName}</strong><br>` : ''}
+                  ${deliveryAddress || ''}
+                </div>
+              </div>
+            ` : ''}
+
+            <table class="item-table">
+              <thead>
                 <tr>
-                  <td style="padding: 4px 0; text-align: left;">${item.name}</td>
-                  <td style="padding: 4px 0; text-align: right;">${receiptDetails.currency || '$'}${item.price.toFixed(2)}</td>
+                  <th>Product Details</th>
+                  <th style="text-align: center; width: 60px;">QTY</th>
+                  <th style="text-align: right; width: 100px;">Total</th>
                 </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                ${items.map((item: { name: string; variant?: string; article?: string; quantity: number; price: number; total?: number }) => `
+                  <tr class="item-row">
+                    <td>
+                      <div class="item-name">${item.name}</div>
+                      ${item.variant ? `<div class="item-variant">${item.variant}</div>` : ''}
+                      <div class="item-article">${item.article || 'N/A'}</div>
+                    </td>
+                    <td style="text-align: center; font-weight: 700; font-size: 13px;">${item.quantity}</td>
+                    <td style="text-align: right; font-weight: 800; font-size: 14px;">${currency}${item.total?.toFixed(2) || (item.price * item.quantity).toFixed(2)}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
 
-        <div style="margin-bottom: 15px; font-size: 13px; color: #333;">
-          ${receiptDetails?.txnId ? `<p style="margin: 2px 0;"><strong>TXN ID:</strong> ${receiptDetails.txnId}</p>` : ''}
-          ${receiptDetails?.paymentMethod ? `<p style="margin: 2px 0;"><strong>PAID VIA:</strong> ${receiptDetails.paymentMethod}</p>` : ''}
-        </div>
+            <table class="summary-table">
+              <tr class="summary-row">
+                <td style="color: #a0aec0;">Subtotal manifest</td>
+                <td style="text-align: right;">${currency}${receiptDetails.subtotal?.toFixed(2) || items.reduce((a: number, b: { price: number; quantity: number; total?: number }) => a + (b.total || b.price * b.quantity), 0).toFixed(2)}</td>
+              </tr>
+              ${discount ? `
+                <tr class="summary-row">
+                  <td style="color: #48bb78;">Promotion applied</td>
+                  <td style="text-align: right; color: #48bb78;">-${currency}${discount.toFixed(2)}</td>
+                </tr>
+              ` : ''}
+              ${tax ? `
+                <tr class="summary-row">
+                  <td style="color: #a0aec0;">Security & Value tax</td>
+                  <td style="text-align: right;">${currency}${tax.toFixed(2)}</td>
+                </tr>
+              ` : ''}
+              <tr class="total-row">
+                <td>TOTAL DUE</td>
+                <td style="text-align: right; color: ${brandColor};">${currency}${total.toFixed(2)}</td>
+              </tr>
+            </table>
+          </div>
 
-        <div style="margin-bottom: 15px;">
-          ${receiptDetails?.discount ? `
-            <div style="display: flex; justify-content: space-between; gap: 20px; margin-bottom: 5px;">
-              <span>Discount</span>
-              <span style="float: right; color: #16a34a;">-${receiptDetails.currency || '$'}${receiptDetails.discount.toFixed(2)}</span>
+          <div class="footer">
+            <div class="security-tag">Verification: Secure-Aero-${Math.random().toString(36).substr(2, 8).toUpperCase()}</div>
+            <div class="footer-note">
+              This document serves as your official digital proof of purchase. <br>
+              <strong>Verify this manifest online:</strong> 
+              <span style="color: ${accentColor}; cursor: pointer;">${storeName || 'UrbanShopOS'}/verify/${txnId}</span>
+              <br><br>
+              Thank you for chooseing ${storeName || 'UrbanShopOS'}. <br>
+              &copy; ${new Date().getFullYear()} Enterprise Commerce Protocol.
             </div>
-            <div style="clear: both;"></div>
-          ` : ''}
-          ${receiptDetails?.tax ? `
-            <div style="display: flex; justify-content: space-between; gap: 20px;">
-              <span>Tax</span>
-              <span style="float: right;">${receiptDetails.currency || '$'}${receiptDetails.tax.toFixed(2)}</span>
-            </div>
-            <div style="clear: both;"></div>
-          ` : ''}
+          </div>
         </div>
-
-        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-          <h2 style="margin: 0; display: inline-block;">TOTAL</h2>
-          <h2 style="margin: 0; float: right;">${receiptDetails.currency || '$'}${receiptDetails?.total?.toFixed(2)}</h2>
-          <div style="clear: both;"></div>
-        </div>
-
-        <div style="text-align: center; color: #888; font-size: 12px;">
-          <p>Thank you for your business!</p>
-          <p>${new Date().toLocaleString()}</p>
-        </div>
-      </div>
+      </body>
+      </html>
     `;
 
     const info = await transporter.sendMail({
