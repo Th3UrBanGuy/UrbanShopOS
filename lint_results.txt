@@ -1,0 +1,83 @@
+
+> urbanshop-os@0.1.0 lint
+> next lint
+
+
+./app/(storefront)/product/[id]/page.tsx
+25:49  Error: 'removeHold' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+27:9  Error: 'removeItem' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+131:26  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/CartDrawer.tsx
+36:11  Error: 'decrementStock' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+53:12  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+317:31  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/DashboardDock.tsx
+5:74  Error: 'Package' is defined but never used.  @typescript-eslint/no-unused-vars
+5:95  Error: 'SettingsIcon' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/Navbar.tsx
+7:113  Error: 'Mail' is defined but never used.  @typescript-eslint/no-unused-vars
+7:148  Error: 'BadgeCheck' is defined but never used.  @typescript-eslint/no-unused-vars
+7:160  Error: 'Clock' is defined but never used.  @typescript-eslint/no-unused-vars
+7:167  Error: 'CheckCircle2' is defined but never used.  @typescript-eslint/no-unused-vars
+7:181  Error: 'Zap' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/dashboard/AdminProfileMenu.tsx
+23:11  Error: 'AccountSettings' is defined but never used.  @typescript-eslint/no-unused-vars
+84:9  Error: 'toggleSetting' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+121:9  Error: 'settingsItems' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+524:44  Error: 'accent' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./components/dashboard/HubView.tsx
+3:27  Error: 'useRef' is defined but never used.  @typescript-eslint/no-unused-vars
+4:45  Error: 'useTransform' is defined but never used.  @typescript-eslint/no-unused-vars
+8:3  Error: 'LayoutGrid' is defined but never used.  @typescript-eslint/no-unused-vars
+13:3  Error: 'MousePointer2' is defined but never used.  @typescript-eslint/no-unused-vars
+14:3  Error: 'Calendar' is defined but never used.  @typescript-eslint/no-unused-vars
+15:3  Error: 'AlertCircle' is defined but never used.  @typescript-eslint/no-unused-vars
+168:38  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+168:45  Error: 'theme' is defined but never used.  @typescript-eslint/no-unused-vars
+185:11  Error: 'theme' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+191:9  Error: 'uniqueCustomers' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+215:51  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/dashboard/KhorochkhataView.tsx
+7:3  Error: 'Plus' is defined but never used.  @typescript-eslint/no-unused-vars
+9:3  Error: 'CalendarDays' is defined but never used.  @typescript-eslint/no-unused-vars
+18:3  Error: 'Filter' is defined but never used.  @typescript-eslint/no-unused-vars
+21:3  Error: 'ChevronRight' is defined but never used.  @typescript-eslint/no-unused-vars
+32:63  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/dashboard/POSView.tsx
+441:33  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+459:37  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+778:25  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+800:29  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/dashboard/PartiesView.tsx
+21:10  Error: 'useDashboardStore' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/dashboard/SalesView.tsx
+49:39  Error: 'getTransactionsByRange' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+97:9  Error: 'getPaymentColor' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./components/dashboard/SettingsView.tsx
+5:19  Error: 'Printer' is defined but never used.  @typescript-eslint/no-unused-vars
+6:29  Error: 'Shield' is defined but never used.  @typescript-eslint/no-unused-vars
+19:8  Error: 'UserManagementView' is defined but never used.  @typescript-eslint/no-unused-vars
+23:10  Error: 'SectionAccordion' is defined but never used.  @typescript-eslint/no-unused-vars
+230:11  Error: 'currentUser' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+239:9  Error: 'handleTest' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./components/dashboard/UserManagementView.tsx
+7:34  Error: 'ChevronRight' is defined but never used.  @typescript-eslint/no-unused-vars
+8:57  Error: 'BookOpen' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./lib/exportUtils.ts
+11:9  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+12:57  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+378:35  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules

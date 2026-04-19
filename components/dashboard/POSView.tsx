@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, Wallet, Smartphone, X, Printer, Settings2, ReceiptText, ArrowRight, Phone } from 'lucide-react';
 import ResinCard from '@/components/ResinCard';
 import LiquidButton from '@/components/LiquidButton';
@@ -13,7 +14,6 @@ import { useCouponStore, Coupon } from '@/store/couponStore';
 import { useToastStore } from '@/store/toastStore';
 import TerminalSettings from './TerminalSettings';
 import ReceiptDocument from './ReceiptDocument';
-import Image from 'next/image';
 import { printReceipt } from '@/lib/printReceipt';
 import { Ticket, BadgeCheck, BadgeAlert } from 'lucide-react';
 
@@ -372,12 +372,14 @@ export default function POSView() {
                   >
                     <div className="aspect-square rounded-xl bg-[var(--background)] border border-[var(--card-border)] mb-3 flex items-center justify-center relative overflow-hidden shrink-0 group-hover:shadow-[0_0_30px_var(--accent-glow)] transition-all duration-500">
                       {p.image ? (
-                        <motion.img 
-                          whileHover={{ scale: 1.1 }}
-                          src={p.image} 
-                          alt={p.name} 
-                          className="w-full h-full object-cover transition-transform duration-700"
-                        />
+                        <motion.div whileHover={{ scale: 1.1 }} className="w-full h-full relative">
+                          <Image 
+                            src={p.image} 
+                            alt={p.name} 
+                            fill
+                            className="object-cover transition-transform duration-700"
+                          />
+                        </motion.div>
                       ) : (
                         <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-tighter select-none">{p.article.split('-')[0]}</span>
                       )}
@@ -438,9 +440,9 @@ export default function POSView() {
                         {!isExpanded ? (
                           <>
                             <div className="w-12 h-12 rounded-lg bg-[var(--input-bg)] border border-[var(--card-border)] flex items-center justify-center relative overflow-hidden mb-1 shadow-inner">
-                              {item.image ? (
-                                <Image src={item.image} alt={item.name} fill unoptimized className="object-cover" />
-                              ) : (
+                                {item.image ? (
+                                  <Image src={item.image} alt={item.name} fill className="object-cover" />
+                                ) : (
                                 <span className="text-[10px] font-black text-[var(--accent)]">{item.quantity}</span>
                               )}
                               <div className="absolute top-0 right-0 px-1 bg-[var(--accent)] text-[var(--background)] text-[8px] font-black rounded-bl-lg">
@@ -457,7 +459,7 @@ export default function POSView() {
                               <div className="flex items-center gap-3 min-w-0">
                                 <div className="w-12 h-12 rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] flex items-center justify-center relative overflow-hidden shrink-0 shadow-resin">
                                   {item.image ? (
-                                    <Image src={item.image} alt={item.name} fill unoptimized className="object-cover" />
+                                    <Image src={item.image} alt={item.name} fill className="object-cover" />
                                   ) : (
                                     <span className="text-[10px] font-black uppercase text-[var(--accent)]">{item.article.split('-')[0]}</span>
                                   )}
@@ -776,7 +778,7 @@ export default function POSView() {
                 <div className="flex gap-6 mb-8 items-start">
                    <div className="w-24 h-24 rounded-2xl bg-[var(--card-bg)] border border-[var(--card-border)] flex items-center justify-center relative overflow-hidden shrink-0 shadow-resin">
                       {pickingVariantFor.image ? (
-                        <Image src={pickingVariantFor.image} alt={pickingVariantFor.name} fill unoptimized className="object-cover" />
+                        <Image src={pickingVariantFor.image} alt={pickingVariantFor.name} fill className="object-cover" />
                       ) : (
                         <span className="text-xl font-black text-[var(--accent)]">{pickingVariantFor.article.split('-')[0]}</span>
                       )}
@@ -797,8 +799,8 @@ export default function POSView() {
                           {v.color}
                         </p>
                         {v.image && (
-                          <div className="w-8 h-8 rounded-lg overflow-hidden border border-[var(--card-border)] shadow-sm">
-                            <Image src={v.image} alt={v.color} fill unoptimized className="object-cover" />
+                          <div className="w-8 h-8 rounded-lg overflow-hidden border border-[var(--card-border)] shadow-sm relative">
+                            <Image src={v.image} alt={v.color} fill className="object-cover" />
                           </div>
                         )}
                       </div>

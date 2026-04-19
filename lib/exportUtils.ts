@@ -1,7 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ExportRow = { [key: string]: any };
-
-export function printReport({ 
+export function printReport<T extends Record<string, any>>({ // eslint-disable-line @typescript-eslint/no-explicit-any
   title, 
   subtitle,
   data, 
@@ -11,8 +8,8 @@ export function printReport({
 }: { 
   title: string; 
   subtitle?: string;
-  data: ExportRow[]; 
-  columns: { key: string; label: string; format?: (val: unknown) => string }[];
+  data: T[]; 
+  columns: { key: string; label: string; format?: (val: any) => string }[]; // eslint-disable-line @typescript-eslint/no-explicit-any
   summary?: { label: string; value: string }[];
   settings: { 
     siteName: string; 
@@ -345,7 +342,8 @@ export function printReport({
                 <tr>
                   ${showSerial ? `<td class="sl-no">${String(idx + 1).padStart(2, '0')}</td>` : ''}
                   ${columns.map(c => {
-                    const val = row[c.key];
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const val = (row as any)[c.key];
                     const display = c.format ? c.format(val) : val;
                     return `<td>${display || '-'}</td>`;
                   }).join('')}
@@ -378,7 +376,7 @@ export function printReport({
   printWindow.document.close();
 }
 
-export function exportToCSV(data: ExportRow[], fileName: string) {
+export function exportToCSV<T extends object>(data: T[], fileName: string) {
   if (data.length === 0) return;
   
   const headers = Object.keys(data[0]).join(',');

@@ -2,14 +2,20 @@
 
 import React, { useState } from 'react';
 import { motion, useMotionValue, useSpring, AnimatePresence } from 'framer-motion';
-import { TrendingUp, BarChart3, Users, Zap, ArrowUpRight, ShoppingBag } from 'lucide-react';
+import { 
+  TrendingUp, 
+  BarChart3, 
+  Users, 
+  Zap, 
+  ArrowUpRight,
+  ShoppingBag
+} from 'lucide-react';
 import ResinCard from '@/components/ResinCard';
 import { cn } from '@/lib/utils';
 import { useDashboardStore } from '@/store/dashboardStore';
 import { useSalesStore } from '@/store/salesStore';
-import { useInventoryStore, InventoryProduct } from '@/store/inventoryStore';
+import { useInventoryStore } from '@/store/inventoryStore';
 import { useSettingsStore } from '@/store/settingsStore';
-import { useUIStore } from '@/store/uiStore';
 
 interface StatTileProps {
   title: string;
@@ -71,9 +77,8 @@ function StatTile({ title, value, change, color, className }: StatTileProps) {
 
 function InventoryTile({ className }: { className?: string }) {
   const { products } = useInventoryStore();
-  const { theme } = useUIStore();
   
-  // Get top 3 products with lowest stock percentage
+  // Get top 3 products with lowest stock percentage or just first 3
   const stocks = itemsToStockTiles(products).slice(0, 3);
 
   return (
@@ -97,7 +102,7 @@ function InventoryTile({ className }: { className?: string }) {
                 className={cn(
                   "h-full rounded-full bg-gradient-to-r", 
                   s.color,
-                  theme === 'light' ? "shadow-[0_0_15px_rgba(30,64,175,0.1)]" : "shadow-[0_0_15px_rgba(255,255,255,0.1)]"
+                  "shadow-[0_0_15px_rgba(255,255,255,0.1)]"
                 )} 
               />
             </div>
@@ -154,7 +159,7 @@ function SalesFeedTile({ className }: { className?: string }) {
   );
 }
 
-function itemsToStockTiles(products: InventoryProduct[]) {
+function itemsToStockTiles(products: { name: string; stock: number }[]) {
   return products.map(p => {
     // Basic stock percentage calculation (max 100 for visual)
     const stockPercent = Math.min(100, Math.floor((p.stock / 100) * 100));
@@ -171,13 +176,11 @@ export default function HubView() {
   const setActiveTab = useDashboardStore((state) => state.setActiveTab);
   const { transactions, getChartData } = useSalesStore();
   const settings = useSettingsStore();
-  useUIStore();
 
   const chartData = getChartData(period);
   const totalRevenue = transactions.reduce((acc, tx) => acc + tx.total, 0);
 
   // Derived dynamic stats
-  // uniqueCustomers available if needed: new Set(transactions.map(tx => tx.customerPhone || tx.customerName)).size
   const totalVisitors = 42800 + transactions.length * 15; // Persistent simulation base + multiplier
   const posCount = transactions.filter(t => t.channel === 'pos').length;
   const onlineCount = transactions.filter(t => t.channel === 'online').length;

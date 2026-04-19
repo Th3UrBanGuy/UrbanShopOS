@@ -75,7 +75,6 @@ export default function AdminProfileMenu() {
     setEditing(false);
   };
 
-
   const handlePinChange = async () => {
     if (!currentUser) return;
     if (pinData.current !== currentUser.pin) return addToast('Current PIN is incorrect', 'error');
@@ -106,7 +105,6 @@ export default function AdminProfileMenu() {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, []);
-
 
   const modal = mounted && modalOpen
     ? createPortal(
