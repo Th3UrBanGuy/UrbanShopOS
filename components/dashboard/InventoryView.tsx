@@ -14,6 +14,7 @@ import { useInventoryStore, InventoryProduct, ColorVariant, getProductDisplayIma
 import { useDashboardStore } from '@/store/dashboardStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useToastStore } from '@/store/toastStore';
+import { calculateTotalStock } from '@/store/inventoryStore';
 
 function MiniStat({ title, value, color }: { title: string, value: string, color?: string }) {
   return (
@@ -46,6 +47,15 @@ export default function InventoryView() {
       setIsEditing(false);
     }
   }, [selectedProduct]);
+
+  useEffect(() => {
+    if (isEditing && editForm && editForm.variants && editForm.variants.length > 0) {
+      const derivedStock = calculateTotalStock(editForm);
+      if (derivedStock !== editForm.stock) {
+        setEditForm({ ...editForm, stock: derivedStock });
+      }
+    }
+  }, [editForm, isEditing]);
 
   const handleStockChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseInt(e.target.value);
@@ -733,7 +743,11 @@ export default function InventoryView() {
                             max="200" 
                             value={editForm.stock} 
                             onChange={handleStockChange}
-                            className="w-full h-2 bg-transparent appearance-none cursor-pointer accent-[var(--accent)] relative z-10"
+                            disabled={!isEditing || (editForm.variants && editForm.variants.length > 0)}
+                            className={cn(
+                              "w-full h-2 bg-transparent appearance-none cursor-pointer accent-[var(--accent)] relative z-10",
+                              (editForm.variants && editForm.variants.length > 0) && "opacity-50 cursor-not-allowed"
+                            )}
                           />
                           <div className="absolute inset-0 bg-[var(--accent)]/10 blur-xl opacity-20 -z-10" />
                         </div>
@@ -763,6 +777,15 @@ export default function InventoryView() {
                          </div>
                       </div>
                    </div>
+                   
+                   {editForm.variants && editForm.variants.length > 0 && (
+                     <div className="mt-8 pt-8 border-t border-[var(--card-border)] flex items-center gap-3">
+                       <Zap size={14} className="text-[var(--accent)] animate-pulse" />
+                       <span className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">
+                         Stock is auto-calculated from {editForm.variants.length} color variants and their sizes.
+                       </span>
+                     </div>
+                   )}
                 </ResinCard>
               </div>
             </div>

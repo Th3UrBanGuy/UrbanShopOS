@@ -53,6 +53,22 @@ export const getProductDisplayImage = (product: InventoryProduct) => {
   return product.image || (product.variants && product.variants.length > 0 ? product.variants[0].image : undefined);
 };
 
+/**
+ * Derived stock calculation based on variant sizes.
+ * Sums up all stock values across all variants.
+ */
+export const calculateTotalStock = (product: InventoryProduct): number => {
+  if (!product.variants || product.variants.length === 0) {
+    return product.stock || 0;
+  }
+  
+  return product.variants.reduce((total, variant) => {
+    return total + (variant.sizes || []).reduce((variantTotal, size) => {
+      return variantTotal + (size.stock || 0);
+    }, 0);
+  }, 0);
+};
+
 const INITIAL_PRODUCTS: InventoryProduct[] = [
   { 
     id: 1, 
@@ -324,22 +340,34 @@ export const useInventoryStore = create<InventoryState>()(
       },
 
       addProduct: async (product: InventoryProduct) => {
+        // Automatically derive total stock from variants if they exist
+        const productToAdd = {
+          ...product,
+          stock: calculateTotalStock(product)
+        };
+
         set((state) => ({
-          products: [...state.products, product]
+          products: [...state.products, productToAdd]
         }));
         try {
-          await inventoryService.create(product);
+          await inventoryService.create(productToAdd);
         } catch (e) {
           console.log('Offline: product creation queued');
         }
       },
 
       updateProduct: async (updatedProduct: InventoryProduct) => {
+        // Automatically derive total stock from variants if they exist
+        const productToUpdate = {
+          ...updatedProduct,
+          stock: calculateTotalStock(updatedProduct)
+        };
+        
         set((state) => ({
-          products: state.products.map(p => p.id === updatedProduct.id ? updatedProduct : p)
+          products: state.products.map(p => p.id === productToUpdate.id ? productToUpdate : p)
         }));
         try {
-          await inventoryService.update(updatedProduct.id, updatedProduct);
+          await inventoryService.update(productToUpdate.id, productToUpdate);
         } catch (e) {
           console.log('Offline: product update queued');
         }

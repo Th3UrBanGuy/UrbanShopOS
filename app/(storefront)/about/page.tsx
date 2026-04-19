@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Zap, Shield, Sparkles, Globe, Cpu } from 'lucide-react';
+import { ArrowRight, Zap, Shield, Sparkles, Cpu } from 'lucide-react';
 import ResinCard from '@/components/ResinCard';
 import LiquidButton from '@/components/LiquidButton';
 import Link from 'next/link';
@@ -96,7 +96,7 @@ export default function AboutPage() {
                    We built UrbanShopOS to dismantle the limitations of current business infrastructure. For too long, software has been disconnected from the physical reality of retail and robotics.
                  </p>
                  <p>
-                   Tectonic operates at the intersection of imagination and engineering. We've combined high-precision software mechanisms with robotics and IOT to create a singular, integrated ecosystem.
+                    Tectonic operates at the intersection of imagination and engineering. We&apos;ve combined high-precision software mechanisms with robotics and IOT to create a singular, integrated ecosystem.
                  </p>
                  <p>
                    UrbanShopOS is not just a tool; it is a substrate designed to scale, protect, and evolve alongside your business vision.

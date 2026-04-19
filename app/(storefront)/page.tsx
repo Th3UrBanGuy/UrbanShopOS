@@ -3,17 +3,14 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Star, Play, X, ShoppingBag, Shield } from 'lucide-react';
-import ResinCard from '@/components/ResinCard';
+import { ArrowRight, Star, Play, X, Shield } from 'lucide-react';
 import LiquidButton from '@/components/LiquidButton';
 import Link from 'next/link';
 import { useInventoryStore, getProductDisplayImage } from '@/store/inventoryStore';
-import { useCartStore } from '@/store/cartStore';
 import { cn } from '@/lib/utils';
 
 export default function Home() {
   const products = useInventoryStore((s) => s.products);
-  const addItem = useCartStore((s) => s.addItem);
   const [isVideoOpen, setIsVideoOpen] = useState(false);
 
   // Show first 6 products for a richer bento

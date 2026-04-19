@@ -17,7 +17,6 @@ import {
   UserPlus,
   Check,
   Printer,
-  Download
 } from 'lucide-react';
 import { usePartyStore } from '@/store/partyStore';
 import { useSettingsStore } from '@/store/settingsStore';

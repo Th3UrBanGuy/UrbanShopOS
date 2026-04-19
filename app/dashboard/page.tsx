@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { LayoutGrid, Bell, Search, Menu, Lock } from 'lucide-react';
+import { LayoutGrid, Bell, Search, Lock } from 'lucide-react';
 import LiquidButton from '@/components/LiquidButton';
 import DashboardDock from '@/components/DashboardDock';
 import ClientOnly from '@/components/ClientOnly';

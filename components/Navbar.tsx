@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Menu, X, ShieldAlert, Unlock, Package, ChevronRight, SearchIcon, Sparkles, Truck, MapPin, Phone, CreditCard, Calendar, Activity, ShieldCheck, Box } from 'lucide-react';
+import { ShoppingBag, Menu, X, ShieldAlert, Unlock, Package, ChevronRight, SearchIcon, Sparkles, Truck, MapPin, Phone, Calendar, Activity, ShieldCheck, Box } from 'lucide-react';
 import LiquidButton from '@/components/LiquidButton';
 import { useCartStore } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
@@ -339,42 +339,42 @@ export default function Navbar() {
                              animate={{ opacity: 1, y: 0 }}
                              className="flex-1 flex flex-col min-h-0"
                            >
-                              <div className="flex-1 overflow-y-auto no-scrollbar pb-32 space-y-4">
-                                 {/* Status Hero Card - Full Width */}
+                              <div className="flex-1 overflow-y-auto no-scrollbar pb-32 space-y-5 px-1">
+                                 {/* 1. Status Hero - Bento Span 2 */}
                                  <motion.div 
-                                   whileHover={{ scale: 0.995 }}
-                                   className="p-8 rounded-[2.5rem] bg-gradient-to-br from-indigo-500/10 via-white/[0.03] to-transparent border border-white/10 relative overflow-hidden group shadow-2xl"
+                                   whileHover={{ y: -2 }}
+                                   className="p-8 rounded-[2.5rem] bg-gradient-to-br from-indigo-500/20 via-white/[0.03] to-transparent border border-white/10 relative overflow-hidden group shadow-2xl"
                                  >
-                                    <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-                                       <Activity size={80} className="text-indigo-400" />
+                                    <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                                       <Activity size={100} className="text-white" />
                                     </div>
                                     
                                     <div className="relative z-10">
-                                       <div className="flex justify-between items-start mb-10">
+                                       <div className="flex justify-between items-start mb-12">
                                           <div>
-                                             <div className="flex items-center gap-3 mb-2">
-                                                <div className="px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/30">
+                                             <div className="flex items-center gap-3 mb-3">
+                                                <div className="px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/30 backdrop-blur-md">
                                                    <p className="text-[10px] font-black text-indigo-300 uppercase tracking-widest">{foundOrder.status}</p>
                                                 </div>
                                                 {foundOrder.status === 'processing' && (
-                                                   <div className="flex gap-1">
-                                                      <div className="w-1 h-1 rounded-full bg-indigo-500 animate-ping" />
-                                                      <div className="w-1 h-1 rounded-full bg-indigo-500 animate-ping delay-75" />
-                                                      <div className="w-1 h-1 rounded-full bg-indigo-500 animate-ping delay-150" />
+                                                   <div className="flex gap-1.5">
+                                                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                                                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse delay-150" />
                                                    </div>
                                                 )}
                                              </div>
-                                             <h3 className="text-3xl font-black tracking-tighter uppercase italic italic-none drop-shadow-lg">
-                                                Track <span className="text-indigo-400">Sequence</span>
+                                             <h3 className="text-4xl font-black tracking-tighter uppercase leading-none italic">
+                                                TRANS<span className="text-indigo-400">ACTION</span>
                                              </h3>
+                                             <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] mt-2">Active Tracker</p>
                                           </div>
                                           <div className="text-right">
-                                             <p className="text-[10px] font-black text-white/20 uppercase tracking-widest mb-1">Total Value</p>
-                                             <p className="text-2xl font-black text-white drop-shadow-md">{settings.formatPrice(foundOrder.total)}</p>
+                                             <p className="text-[10px] font-black text-white/20 uppercase tracking-widest mb-1">Vault Value</p>
+                                             <p className="text-3xl font-black text-white drop-shadow-2xl">{settings.formatPrice(foundOrder.total)}</p>
                                           </div>
                                        </div>
 
-                                       <div className="relative h-1.5 w-full bg-white/5 rounded-full overflow-hidden mb-4">
+                                       <div className="relative h-2 w-full bg-white/5 rounded-full overflow-hidden mb-6 shadow-inner">
                                           <motion.div 
                                              initial={{ width: 0 }}
                                              animate={{ 
@@ -382,135 +382,145 @@ export default function Navbar() {
                                                        foundOrder.status === 'shipped' ? '75%' :
                                                        foundOrder.status === 'processing' ? '50%' : '25%' 
                                              }}
-                                             transition={{ duration: 1.5, ease: "easeOut" }}
-                                             className="absolute inset-y-0 left-0 bg-gradient-to-r from-indigo-600 to-indigo-400 shadow-[0_0_20px_rgba(99,102,241,0.6)]"
+                                             transition={{ duration: 1.5, ease: [0.23, 1, 0.32, 1] }}
+                                             className="absolute inset-y-0 left-0 bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-400 shadow-[0_0_25px_rgba(99,102,241,0.8)]"
                                           />
                                        </div>
                                        
                                        <div className="flex justify-between px-1">
-                                          {['Pending', 'Process', 'Ship', 'Finish'].map((label, idx) => {
+                                          {['Manifest', 'In-Queue', 'Transit', 'Delivered'].map((label, idx) => {
                                              const statuses = ['pending', 'processing', 'shipped', 'delivered', 'completed'];
                                              const currentIdx = statuses.indexOf(foundOrder.status);
                                              const isPast = currentIdx >= idx;
                                              return (
-                                                <span key={label} className={cn(
-                                                   "text-[8px] font-black uppercase tracking-tighter transition-colors duration-500",
-                                                   isPast ? "text-indigo-400" : "text-white/10"
-                                                )}>
-                                                   {label}
-                                                </span>
+                                                <div key={label} className="flex flex-col items-center gap-2">
+                                                   <span className={cn(
+                                                      "text-[8px] font-black uppercase tracking-tighter transition-all duration-700",
+                                                      isPast ? "text-indigo-400 scale-110" : "text-white/5"
+                                                   )}>
+                                                      {label}
+                                                   </span>
+                                                   <div className={cn(
+                                                      "w-1 h-1 rounded-full transition-all duration-700",
+                                                      isPast ? "bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,1)]" : "bg-white/5"
+                                                   )} />
+                                                </div>
                                              );
                                           })}
                                        </div>
                                     </div>
                                  </motion.div>
 
-                                 {/* Intelligence Grid - 2 Columns on MD */}
-                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {/* Logistics Card */}
-                                    <div className="p-6 rounded-[2rem] bg-white/[0.03] border border-white/5 backdrop-blur-md flex flex-col justify-between group hover:bg-white/[0.05] transition-all duration-500">
+                                 {/* 2x2 Bento Intelligence Row */}
+                                 <div className="grid grid-cols-2 gap-4">
+                                    {/* Logistics Bento - Small */}
+                                    <motion.div 
+                                       whileHover={{ scale: 1.02 }}
+                                       className="p-6 rounded-[2rem] bg-white/[0.03] border border-white/5 backdrop-blur-xl flex flex-col justify-between group h-48"
+                                    >
+                                       <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-4 shadow-lg">
+                                          <Truck size={14} />
+                                       </div>
                                        <div>
-                                          <div className="flex items-center gap-2 mb-6">
-                                             <div className="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
-                                                <Truck size={14} />
-                                             </div>
-                                             <h5 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Logistics</h5>
-                                          </div>
-                                          
-                                          {foundOrder.deliveryAddress ? (
-                                             <div className="space-y-4">
-                                                <div className="flex gap-3">
-                                                   <MapPin size={14} className="text-indigo-400 shrink-0 mt-1" />
-                                                   <div>
-                                                      <p className="text-[11px] font-bold text-white/80 leading-relaxed">{foundOrder.deliveryAddress}</p>
-                                                      <p className="text-[9px] font-black text-indigo-400/60 uppercase tracking-widest mt-1">{foundOrder.deliveryCity}</p>
-                                                   </div>
-                                                </div>
-                                             </div>
-                                          ) : (
-                                             <div className="py-4 flex flex-col items-center justify-center text-center">
-                                                <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/10 mb-2">
-                                                   <Package size={16} />
-                                                </div>
-                                                <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">In-Store Collection</p>
-                                             </div>
-                                          )}
+                                          <h5 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 mb-2">Carrier</h5>
+                                          <p className="text-xs font-bold text-white/80 leading-tight">
+                                             {foundOrder.deliveryCity || 'Internal Dispatch'}
+                                          </p>
+                                          <p className="text-[8px] font-black text-emerald-400/60 uppercase tracking-widest mt-1">Zone Alpha</p>
                                        </div>
-                                       
-                                       <div className="mt-6 pt-4 border-t border-white/5 flex justify-between items-center text-[8px] font-black text-white/20 uppercase tracking-widest">
-                                          <span>Zone: {foundOrder.deliveryCity || 'Alpha-1'}</span>
-                                          <div className="flex gap-1">
-                                             <div className="w-1 h-1 rounded-full bg-white/20" />
-                                             <div className="w-1 h-1 rounded-full bg-white/20" />
-                                          </div>
-                                       </div>
-                                    </div>
+                                    </motion.div>
 
-                                    {/* Identity & Payment Card */}
-                                    <div className="p-6 rounded-[2rem] bg-white/[0.03] border border-white/5 backdrop-blur-md space-y-6 hover:bg-white/[0.05] transition-all duration-500">
-                                       <div className="flex items-center gap-2 mb-2">
-                                          <div className="w-8 h-8 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
-                                             <CreditCard size={14} />
-                                          </div>
-                                          <h5 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Checkout ID</h5>
+                                    {/* Security Bento - Small */}
+                                    <motion.div 
+                                       whileHover={{ scale: 1.02 }}
+                                       className="p-6 rounded-[2rem] bg-indigo-500/5 border border-white/5 backdrop-blur-xl flex flex-col justify-between h-48"
+                                    >
+                                       <div className="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-4 shadow-lg">
+                                          <ShieldCheck size={14} />
                                        </div>
+                                       <div>
+                                          <h5 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 mb-2">Protocol</h5>
+                                          <p className="text-xs font-black text-indigo-400 uppercase leading-tight">{foundOrder.paymentMethod}</p>
+                                          <p className="text-[8px] font-black text-white/20 uppercase tracking-widest mt-1 italic">Verified Seq</p>
+                                       </div>
+                                    </motion.div>
 
-                                       <div className="space-y-4">
-                                          <div className="flex items-center gap-3">
-                                             <div className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-white/40 shrink-0">
-                                                <Phone size={12} />
-                                             </div>
-                                             <div>
-                                                <p className="text-[8px] font-black text-white/20 uppercase tracking-widest">Contact Signal</p>
-                                                <p className="text-[10px] font-bold text-white/80">{foundOrder.customerPhone || 'DIRECT POS'}</p>
-                                             </div>
+                                    {/* Address Bento - Wide Span (2 cols on mobile search results) */}
+                                    <motion.div 
+                                       whileHover={{ scale: 0.99 }}
+                                       className="col-span-2 p-7 rounded-[2.5rem] bg-white/[0.02] border border-white/5 backdrop-blur-md flex items-center gap-6 group"
+                                    >
+                                       <div className="w-14 h-14 rounded-[1.5rem] bg-white/5 border border-white/10 flex items-center justify-center text-white/30 group-hover:text-indigo-400 transition-colors shrink-0">
+                                          <MapPin size={24} strokeWidth={1.5} />
+                                       </div>
+                                       <div>
+                                          <h5 className="text-[9px] font-black uppercase tracking-[0.3em] text-white/20 mb-1.5 flex items-center gap-2">
+                                             <div className="w-1 h-1 rounded-full bg-white/20" /> Destination
+                                          </h5>
+                                          <p className="text-sm font-bold text-white/70 leading-relaxed italic">
+                                             {foundOrder.deliveryAddress || 'Standard Warehouse Point Access'}
+                                          </p>
+                                       </div>
+                                    </motion.div>
+
+                                    {/* Customer Identity Bento */}
+                                    <motion.div 
+                                       whileHover={{ x: 5 }}
+                                       className="col-span-2 p-6 rounded-[2rem] bg-purple-500/5 border border-purple-500/10 backdrop-blur-3xl flex justify-between items-center group"
+                                    >
+                                       <div className="flex items-center gap-4">
+                                          <div className="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-400 border border-purple-500/20">
+                                             <Phone size={16} />
                                           </div>
-                                          <div className="flex items-center gap-3">
-                                             <div className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-white/40 shrink-0">
-                                                <ShieldCheck size={12} />
-                                             </div>
-                                             <div>
-                                                <p className="text-[8px] font-black text-white/20 uppercase tracking-widest">Payment Protocol</p>
-                                                <p className="text-[10px] font-black text-purple-400 uppercase">{foundOrder.paymentMethod}</p>
-                                             </div>
+                                          <div>
+                                             <p className="text-[8px] font-black text-purple-400/40 uppercase tracking-[0.2em] mb-0.5">Signal Source</p>
+                                             <p className="text-xs font-bold text-white tracking-widest group-hover:text-purple-300 transition-colors">
+                                                {foundOrder.customerPhone || 'DIRECT ACCESS'}
+                                             </p>
                                           </div>
                                        </div>
-                                    </div>
+                                       <div className="text-right">
+                                          <div className="px-3 py-1 rounded-lg bg-white/5 border border-white/10">
+                                             <p className="text-[8px] font-black text-white/30 uppercase tracking-widest">Authorized</p>
+                                          </div>
+                                       </div>
+                                    </motion.div>
                                  </div>
 
-                                 {/* Manifest Block - High Density Vault */}
-                                 <div className="p-6 rounded-[2.5rem] bg-white/[0.03] border border-white/5 backdrop-blur-md relative overflow-hidden group">
-                                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                                       <Box size={40} className="text-white" />
+                                 {/* 3. Manifest Block - Full Width Bento */}
+                                 <div className="p-8 rounded-[3rem] bg-gradient-to-br from-white/[0.04] to-transparent border border-white/5 backdrop-blur-md relative overflow-hidden group">
+                                    <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-all duration-1000 rotate-12">
+                                       <Box size={100} className="text-white" />
                                     </div>
                                     
-                                    <h5 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 mb-6 flex items-center gap-2">
-                                       <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.8)]" />
-                                       Vault manifest
+                                    <h5 className="text-[11px] font-black uppercase tracking-[0.4em] text-white/40 mb-8 flex items-center gap-3">
+                                       <div className="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_15px_rgba(99,102,241,1)] animate-pulse" />
+                                       Vault manifest sequence
                                     </h5>
 
-                                    <div className="space-y-3">
+                                    <div className="space-y-4">
                                        {foundOrder.items.map((item, i) => (
                                          <motion.div 
                                            key={i} 
-                                           whileHover={{ x: 5 }}
-                                           className="flex justify-between items-center p-3 rounded-2xl bg-white/[0.02] border border-white/5 group/item transition-colors hover:bg-white/[0.04]"
+                                           initial={{ opacity: 0, x: -10 }}
+                                           animate={{ opacity: 1, x: 0 }}
+                                           transition={{ delay: i * 0.1 }}
+                                           className="flex justify-between items-center p-4 rounded-3xl bg-white/[0.03] border border-white/5 group/item hover:bg-white/[0.07] transition-all"
                                          >
-                                            <div className="flex items-center gap-4">
+                                            <div className="flex items-center gap-5">
                                                <div className="relative">
-                                                  <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-[11px] font-black z-10 relative">
+                                                  <div className="w-12 h-12 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-center text-xs font-black z-10 relative text-indigo-400">
                                                      {item.quantity}
                                                   </div>
-                                                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-indigo-500 rounded-full border-2 border-black/50 z-20" />
                                                </div>
                                                <div>
-                                                  <p className="text-[11px] font-bold text-white/90">{item.name}</p>
+                                                  <p className="text-sm font-bold text-white/95 tracking-tight">{item.name}</p>
                                                   {item.selectedVariant && (
-                                                    <div className="flex items-center gap-2 mt-1">
-                                                       <span className="px-1.5 py-0.5 rounded-md bg-white/5 text-[7px] font-black text-indigo-400 uppercase tracking-widest italic">
+                                                    <div className="flex items-center gap-2.5 mt-1.5 ">
+                                                       <span className="px-2 py-0.5 rounded-lg bg-indigo-500/10 text-[8px] font-black text-indigo-400 uppercase tracking-[0.2em] italic border border-indigo-500/10">
                                                           {item.selectedVariant.color}
                                                        </span>
-                                                       <span className="px-1.5 py-0.5 rounded-md bg-white/5 text-[7px] font-black text-white/30 uppercase tracking-widest">
+                                                       <span className="px-2 py-0.5 rounded-lg bg-white/5 text-[8px] font-black text-white/20 uppercase tracking-[0.2em] border border-white/5">
                                                           SZ:{item.selectedVariant.size}
                                                        </span>
                                                     </div>
@@ -518,8 +528,8 @@ export default function Navbar() {
                                                </div>
                                             </div>
                                             <div className="text-right">
-                                               <p className="text-[10px] font-black text-white/60">{settings.formatPrice(item.price * item.quantity)}</p>
-                                               <p className="text-[7px] font-bold text-white/10 uppercase tracking-widest mt-0.5">Verified</p>
+                                               <p className="text-xs font-black text-white/80">{settings.formatPrice(item.price * item.quantity)}</p>
+                                               <p className="text-[7px] font-bold text-emerald-500/40 uppercase tracking-[0.3em] mt-1.5">Integrity Verified</p>
                                             </div>
                                          </motion.div>
                                        ))}
@@ -527,13 +537,15 @@ export default function Navbar() {
                                  </div>
 
                                  {/* Technical Log Footer */}
-                                 <div className="pt-4 flex flex-col items-center gap-4">
-                                    <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/5 text-[9px] font-black text-white/20 tracking-wider">
-                                       <Calendar size={10} />
+                                 <div className="pt-8 pb-12 flex flex-col items-center gap-5">
+                                    <div className="flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/5 border border-white/10 text-[9px] font-black text-white/20 tracking-[0.2em] backdrop-blur-xl">
+                                       <Calendar size={11} className="text-indigo-500/50" />
                                        SEQUENCE INITIATED: {new Date(foundOrder.timestamp).toLocaleDateString()}
                                     </div>
-                                    <p className="text-[8px] font-black text-white/5 uppercase tracking-[0.5em]">T-ID: {foundOrder.id}</p>
-                                    <div className="h-10" /> {/* Spacer */}
+                                    <div className="flex flex-col items-center gap-2">
+                                       <p className="text-[8px] font-black text-white/[0.03] uppercase tracking-[1em] select-none">AUTHORIZED SYSTEM ACCESS ONLY</p>
+                                       <p className="text-[10px] font-black text-white/10 uppercase tracking-[0.3em]">REF_ID: {foundOrder.id}</p>
+                                    </div>
                                  </div>
                               </div>
                              </motion.div>
