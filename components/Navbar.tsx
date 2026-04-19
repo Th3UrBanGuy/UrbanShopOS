@@ -345,6 +345,7 @@ export default function Navbar() {
                               animate={{ opacity: 1 }}
                               exit={{ opacity: 0 }}
                               className="fixed inset-0 z-[100] bg-[#f1f5f9] overflow-y-auto no-scrollbar"
+                              id="printable-tracker"
                             >
                                <TrackingReport 
                                  order={foundOrder} 

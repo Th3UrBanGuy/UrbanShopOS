@@ -503,7 +503,7 @@ export default function PartiesView() {
       {/* Report Modal */}
       <AnimatePresence>
         {isPrinting && selectedParty && (
-          <div className="fixed inset-0 z-[300] bg-white overflow-y-auto no-scrollbar">
+          <div id="printable-report" className="fixed inset-0 z-[300] bg-white overflow-y-auto no-scrollbar">
             <PartyReportDocument 
               party={selectedParty} 
               onClose={() => setIsPrinting(false)} 

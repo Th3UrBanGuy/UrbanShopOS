@@ -49,7 +49,7 @@ export default function TrackingReport({ order, onClose }: TrackingReportProps) 
 
   return (
     <div className="bg-[#f1f5f9] text-[#0f172a] min-h-screen font-sans selection:bg-[#0f172a] selection:text-white print:bg-white print:p-0">
-      <div className="max-w-4xl mx-auto p-4 md:p-12 relative z-10 print:max-w-none print:p-0">
+      <div className="max-w-4xl mx-auto p-2 md:p-12 relative z-10 print:max-w-none print:p-0">
         <motion.div 
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -58,15 +58,15 @@ export default function TrackingReport({ order, onClose }: TrackingReportProps) 
           {/* Top Security Line */}
           <div className="h-2 w-full bg-gradient-to-r from-indigo-900 via-indigo-600 to-indigo-900" />
 
-          <div className="p-8 md:p-16">
+          <div className="p-4 sm:p-8 md:p-16">
             {/* Header branding */}
             <div className="flex flex-col md:flex-row justify-between items-start border-b-2 border-slate-900 pb-10 mb-12 gap-8">
-              <div className="space-y-6">
+              <div className="space-y-6 w-full md:w-auto">
                 <div className="brand-box">
-                  <h1 className="text-4xl font-sans tracking-tight leading-none mb-2">
+                  <h1 className="text-3xl md:text-4xl font-sans tracking-tight leading-none mb-2 break-words">
                     {formatBrandName(settings.siteName)}
                   </h1>
-                  <div className="flex flex-col text-[9px] font-bold text-slate-400 uppercase tracking-widest gap-1">
+                  <div className="flex flex-col text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest gap-1">
                     <span>Order Security Protocol // Terminal V1.2</span>
                     <span>Verified Logistics Manifest</span>
                   </div>
@@ -74,12 +74,12 @@ export default function TrackingReport({ order, onClose }: TrackingReportProps) 
               </div>
 
               <div className="flex flex-col items-start md:items-end w-full md:w-auto mt-4 md:mt-0">
-                <div className="text-right mb-6">
-                   <p className="text-[12px] font-black uppercase tracking-[0.3em] text-[#0f172a]">Public Status Report</p>
-                   <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mt-1">Transaction Verified</p>
+                <div className="text-left md:text-right mb-6">
+                   <p className="text-[10px] md:text-[12px] font-black uppercase tracking-[0.3em] text-[#0f172a]">Public Status Report</p>
+                   <p className="text-[8px] md:text-[10px] font-bold text-indigo-600 uppercase tracking-widest mt-1">Transaction Verified</p>
                 </div>
-                <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-[9px] font-bold text-slate-400 uppercase">
-                  <div>TRACK ID: <b className="text-[#0f172a]">{order.id.toUpperCase()}</b></div>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-[8px] md:text-[9px] font-bold text-slate-400 uppercase">
+                  <div>TRACK ID: <b className="text-[#0f172a] break-all">{order.id.toUpperCase()}</b></div>
                   <div>STATUS: <b className="text-emerald-500">{order.status.toUpperCase()}</b></div>
                   <div>SECURITY: <b className="text-[#0f172a]">AES-256</b></div>
                   <div>REF: <b className="text-[#0f172a]">SYS-{Math.random().toString(36).substring(2, 6).toUpperCase()}</b></div>
@@ -93,12 +93,12 @@ export default function TrackingReport({ order, onClose }: TrackingReportProps) 
                  <span className="w-8 h-[2px] bg-indigo-600" /> Transition Timeline Log
                </h3>
 
-               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                  {statusSteps.map((step, idx) => {
                    const isActive = idx <= (currentStatusIdx === -1 && displayStatus === 'shipped' ? 2 : currentStatusIdx);
                    return (
                      <div key={step.id} className={cn(
-                       "relative p-5 rounded-2xl border transition-all duration-500",
+                       "relative p-4 md:p-5 rounded-2xl border transition-all duration-500",
                        isActive ? "bg-slate-50 border-indigo-200" : "bg-white border-slate-100 opacity-40"
                      )}>
                         <div className="flex justify-between items-start mb-4">
@@ -127,8 +127,8 @@ export default function TrackingReport({ order, onClose }: TrackingReportProps) 
                     <span className="w-8 h-[2px] bg-indigo-600" /> Package Manifest Breakdown
                   </h3>
                   
-                  <div className="overflow-hidden rounded-xl border border-slate-200">
-                    <table className="w-full text-left border-collapse">
+                  <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar rounded-xl border border-slate-200">
+                    <table className="w-full text-left border-collapse min-w-[500px]">
                       <thead>
                         <tr className="bg-slate-900 text-white">
                           <th className="py-3 px-5 text-[9px] font-black uppercase tracking-widest w-12">QTY</th>
@@ -141,7 +141,7 @@ export default function TrackingReport({ order, onClose }: TrackingReportProps) 
                           <tr key={idx} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                             <td className="py-4 px-5 text-indigo-600 font-mono">{String(item.quantity).padStart(2, '0')}</td>
                             <td className="py-4 px-5">
-                               <p className="text-[#0f172a] uppercase tracking-tight mb-1">{item.name}</p>
+                               <p className="text-[#0f172a] uppercase tracking-tight mb-1 break-words">{item.name}</p>
                                <div className="flex gap-3 text-[8px] font-black uppercase tracking-widest text-slate-400">
                                  <span>{item.article || 'Ref: Standard'}</span>
                                  {item.selectedVariant && (
@@ -253,7 +253,7 @@ export default function TrackingReport({ order, onClose }: TrackingReportProps) 
         <div className="flex gap-4">
           <button 
             onClick={() => window.print()}
-            className="px-8 h-12 bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-[0_0_40px_rgba(79,70,229,0.3)] hover:scale-105 active:scale-95 transition-all flex items-center gap-3 border border-white/10"
+            className="px-4 md:px-8 h-10 md:h-12 bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-widest text-[9px] md:text-[11px] shadow-[0_0_40px_rgba(79,70,229,0.3)] hover:scale-105 active:scale-95 transition-all flex items-center gap-2 md:gap-3 border border-white/10"
           >
             <Printer size={20} /> Archive Manifest
           </button>
@@ -268,10 +268,40 @@ export default function TrackingReport({ order, onClose }: TrackingReportProps) 
         }
 
         @media print {
-          body { background: white !important; }
-          .print\\:hidden, .fixed { display: none !important; }
-          .max-w-4xl { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
-          .bg-white, .shadow-2xl { box-shadow: none !important; }
+          /* Hide everything first */
+          body > *, #root > *, .__next > * {
+            display: none !important;
+          }
+          
+          /* Show precisely our target and its relevant parents */
+          html, body, #printable-tracker, #printable-tracker * {
+            display: block !important;
+            visibility: visible !important;
+            background: white !important;
+            color: black !important;
+          }
+
+          #printable-tracker {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            height: auto !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            z-index: 99999 !important;
+            overflow: visible !important;
+          }
+
+          .print\\:hidden { display: none !important; }
+          .max-w-4xl { max-width: 100% !important; }
+          .shadow-2xl { box-shadow: none !important; }
+          
+          /* Ensure no fixed background stays if it was scrolllocked */
+          body {
+            overflow: visible !important;
+            height: auto !important;
+          }
         }
       `}</style>
     </div>
