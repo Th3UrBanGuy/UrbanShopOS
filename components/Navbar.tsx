@@ -9,7 +9,7 @@ import LiquidButton from '@/components/LiquidButton';
 import { useCartStore } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
 import { useSalesStore } from '@/store/salesStore';
-import { useSettingsStore } from '@/store/settingsStore';
+import { useDashboardStore } from '@/store/dashboardStore';
 import { cn } from '@/lib/utils';
 import { SaleTransaction } from '@/types';
 import TrackingReport from './TrackingReport';
@@ -32,10 +32,14 @@ export default function Navbar() {
   // Auth & Search state
   const {} = useAuthStore();
   const { transactions } = useSalesStore();
-  useSettingsStore();
+  const { setOverlayOpen } = useDashboardStore();
   const [searchId, setSearchId] = useState('');
   const [foundOrder, setFoundOrder] = useState<SaleTransaction | null>(null);
   const [isSearching, setIsSearching] = useState(false);
+
+  useEffect(() => {
+    setOverlayOpen(foundOrder !== null);
+  }, [foundOrder, setOverlayOpen]);
 
   const handleAdminClick = (e: React.MouseEvent) => {
     e.preventDefault();

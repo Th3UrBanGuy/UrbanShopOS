@@ -85,7 +85,7 @@ function DockIcon({ children, display, active, onClick, mouseX, isCompact, isMob
 
 export default function DashboardDock() {
   const mouseX = useMotionValue(Infinity);
-  const { activeTab, setActiveTab } = useDashboardStore();
+  const { activeTab, setActiveTab, isOverlayOpen } = useDashboardStore();
   const { currentUser } = useAuthStore();
   const [isMobile, setIsMobile] = useState(false);
   const [isInputFocused, setIsInputFocused] = useState(false);
@@ -126,20 +126,24 @@ export default function DashboardDock() {
   const isPosMode = activeTab === 'PoS';
 
   return (
-    <div className={cn(
-      "fixed inset-x-0 bottom-0 z-[100] flex p-4 md:p-6 pointer-events-none transition-all duration-500",
-      isPosMode ? "justify-start" : "justify-center"
-    )}>
-      <motion.div 
-        layout
-        initial={false}
-        animate={{
-          padding: isMobile ? '0.4rem' : '0.5rem',
-          borderRadius: isPosMode ? '0.85rem' : (isMobile ? '1.25rem' : '1.75rem'),
-          opacity: isInputFocused ? 0.15 : 1,
-          scale: isInputFocused ? 0.85 : 1,
-          height: isPosMode ? 'auto' : (isMobile ? '4.5rem' : '5rem'),
-        }}
+    <AnimatePresence>
+      {!isOverlayOpen && (
+        <div className={cn(
+          "fixed inset-x-0 bottom-0 z-[100] flex p-4 md:p-6 pointer-events-none transition-all duration-500",
+          isPosMode ? "justify-start" : "justify-center"
+        )}>
+          <motion.div 
+            layout
+            initial={{ y: 100, opacity: 0 }}
+            animate={{
+              padding: isMobile ? '0.4rem' : '0.5rem',
+              borderRadius: isPosMode ? '0.85rem' : (isMobile ? '1.25rem' : '1.75rem'),
+              opacity: isInputFocused ? 0.15 : 1,
+              scale: isInputFocused ? 0.85 : 1,
+              height: isPosMode ? 'auto' : (isMobile ? '4.5rem' : '5rem'),
+              y: 0
+            }}
+            exit={{ y: 100, opacity: 0 }}
         transition={{ type: "spring", stiffness: 200, damping: 25 }}
         style={{ pointerEvents: isInputFocused ? 'none' : 'auto' }}
         className="bg-[var(--glass-bg)] backdrop-blur-[40px] border border-[var(--card-border)] shadow-resin flex flex-col items-center w-max pointer-events-auto"
@@ -201,5 +205,7 @@ export default function DashboardDock() {
       )}
       </motion.div>
     </div>
+    )}
+    </AnimatePresence>
   );
 }

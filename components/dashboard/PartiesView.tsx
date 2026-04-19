@@ -18,6 +18,7 @@ import {
   Check,
   Printer,
 } from 'lucide-react';
+import { useDashboardStore } from '@/store/dashboardStore';
 import { usePartyStore } from '@/store/partyStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { cn } from '@/lib/utils';
@@ -35,6 +36,11 @@ export default function PartiesView() {
   const [showAddEntry, setShowAddEntry] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
+  const { setOverlayOpen } = useDashboardStore();
+
+  React.useEffect(() => {
+    setOverlayOpen(isPrinting);
+  }, [isPrinting, setOverlayOpen]);
 
   // Form states
   const [partyName, setPartyName] = useState('');
